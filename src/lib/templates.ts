@@ -1,5 +1,21 @@
 import { LegoApp, AppVersion } from '@/types/legologic';
 
+export const CREATE_BLANK_APP = (): LegoApp => ({
+  id: 'app-new-blank',
+  slug: 'project-baru',
+  name: 'Project Baru',
+  description: 'Kanvas aplikasi baru yang bersih. Siap dibangun dari instruksi Anda.',
+  category: 'custom',
+  currentVersion: 0,
+  isPublished: false,
+  publishedSlug: 'project-baru',
+  createdAt: '2026-11-09T00:00:00Z',
+  updatedAt: '2026-11-09T00:00:00Z',
+  organizationId: 'org-default',
+  createdById: 'user-bobi',
+  versions: []
+});
+
 export const SATU_PIPELINE_APP: LegoApp = {
   id: 'app-satupipeline',
   slug: 'satupipeline',

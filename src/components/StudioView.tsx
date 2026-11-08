@@ -11,7 +11,7 @@ import {
   Send, Sparkles, Eye, Code2, ArrowUp, Plus, Paperclip, 
   Wand2, ExternalLink, Copy, Check, ChevronDown, 
   ChevronUp, CheckCircle2, Circle, X, Smartphone, Tablet, Monitor,
-  LayoutGrid, Rocket, QrCode, ArrowRight, Layers
+  LayoutGrid, Rocket, QrCode, ArrowRight, Layers, ArrowUpRight
 } from 'lucide-react';
 
 function FigmaIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
@@ -45,8 +45,8 @@ interface StudioViewProps {
   onUpdateWallet: (wallet: CreditWallet) => void;
   onSelectApp: (appId: string) => void;
   onOpenBilling: () => void;
-  isHomeState: boolean;
-  onExitHomeState: () => void;
+  isHomeState?: boolean;
+  onExitHomeState?: () => void;
 }
 
 export function StudioView({
@@ -60,12 +60,12 @@ export function StudioView({
   onUpdateWallet,
   onSelectApp,
   onOpenBilling,
-  isHomeState,
+  isHomeState = false,
   onExitHomeState,
 }: StudioViewProps) {
   // Right pane tab: 'preview' vs 'code'
   const [rightTab, setRightTab] = useState<'preview' | 'code'>('preview');
-  const [deviceMode, setDeviceMode] = useState<'mobile' | 'tablet' | 'desktop'>('mobile');
+  const [deviceMode, setDeviceMode] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
   
   // Middle pane prompt & generation
   const [promptInput, setPromptInput] = useState('');
@@ -76,20 +76,31 @@ export function StudioView({
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Interactive checklist tasks
-  const [checklistTasks, setChecklistTasks] = useState([
-    { id: 't1', text: 'Build pipeline kanban stages & consent tracking', done: true },
-    { id: 't2', text: 'Configure Rupiah currency & lead contact fields', done: true },
-    { id: 't3', text: 'Wire up WhatsApp click-to-chat action', done: true },
-    { id: 't4', text: 'Connect live database table & persist record updates', done: false },
-  ]);
+  // Check if project is in blank/draft state (No versions or versionNumber === 0)
+  const isCleanBlank = !app.versions || app.versions.length === 0 || app.currentVersion === 0;
 
-  const currentVersion: AppVersion = 
-    app.versions.find(v => v.versionNumber === app.currentVersion) || app.versions[app.versions.length - 1];
+  // Interactive checklist tasks
+  const [checklistTasks, setChecklistTasks] = useState(
+    isCleanBlank 
+      ? [
+          { id: 't1', text: 'Ketik instruksi kebutuhan aplikasi Anda di prompt box', done: false },
+          { id: 't2', text: 'Claude Sonnet 4.6 merancang komponen UI & skema database', done: false },
+          { id: 't3', text: 'Preview interaktif & kode TSX siap dikustomisasi', done: false },
+        ]
+      : [
+          { id: 't1', text: 'Build pipeline kanban stages & consent tracking', done: true },
+          { id: 't2', text: 'Configure Rupiah currency & lead contact fields', done: true },
+          { id: 't3', text: 'Wire up WhatsApp click-to-chat action', done: true },
+          { id: 't4', text: 'Connect live database table & persist record updates', done: true },
+        ]
+  );
+
+  const currentVersion: AppVersion | undefined = isCleanBlank 
+    ? undefined 
+    : (app.versions.find(v => v.versionNumber === app.currentVersion) || app.versions[app.versions.length - 1]);
 
   const sourceCode = generateAppSourceCode(currentVersion);
   const codeLines = sourceCode.split('\n');
-
   const doneCount = checklistTasks.filter(t => t.done).length;
 
   const toggleTask = (id: string) => {
@@ -106,57 +117,91 @@ export function StudioView({
       return;
     }
 
-    if (isHomeState) {
-      onExitHomeState();
-    }
-
     setIsGenerating(true);
     setGenerationStep('Menghubungi Claude Sonnet 4.6 via Sakelar AI...');
 
     try {
-      setTimeout(() => setGenerationStep('Menganalisis skema data & arsitektur komponen...'), 1200);
-      setTimeout(() => setGenerationStep('Menyusun pembaruan versi v' + (currentVersion.versionNumber + 1) + '...'), 2400);
+      if (isCleanBlank) {
+        // Generating initial app v1
+        setTimeout(() => setGenerationStep('Menganalisis kebutuhan & merancang skema database...'), 1200);
+        setTimeout(() => setGenerationStep('Menyusun arsitektur komponen & antarmuka interaktif...'), 2400);
 
-      const res = await fetch('/api/ai/revise', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: text,
-          mode: 'build',
-          existingVersion: currentVersion,
-          wallet,
-        }),
-      });
+        const res = await fetch('/api/ai/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: text,
+            mode: 'build',
+            wallet,
+          }),
+        });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal memproses revisi');
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Gagal generate aplikasi');
+        }
+
+        const generatedApp: LegoApp = data.app;
+        const nextWallet: CreditWallet = {
+          ...wallet,
+          aiCredits: Math.max(0, wallet.aiCredits - 2),
+          aiUsedThisMonth: wallet.aiUsedThisMonth + 2,
+          cloudCredits: Math.max(0, wallet.cloudCredits - 1),
+        };
+
+        onUpdateApp(generatedApp);
+        onUpdateWallet(nextWallet);
+
+        setChecklistTasks([
+          { id: 't1', text: 'Ketik instruksi kebutuhan aplikasi Anda', done: true },
+          { id: 't2', text: 'Claude Sonnet 4.6 merancang komponen UI & skema database', done: true },
+          { id: 't3', text: 'Preview interaktif & kode TSX siap dikustomisasi', done: true },
+        ]);
+      } else {
+        // Revising existing app
+        setTimeout(() => setGenerationStep('Menganalisis pembaruan fitur & tata letak...'), 1200);
+        setTimeout(() => setGenerationStep('Menyusun versi v' + ((currentVersion?.versionNumber || 1) + 1) + '...'), 2400);
+
+        const res = await fetch('/api/ai/revise', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: text,
+            mode: 'build',
+            existingVersion: currentVersion,
+            wallet,
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Gagal memproses revisi');
+        }
+
+        const newVer: AppVersion = data.version;
+        const updatedVersions = [...app.versions, newVer];
+        const updatedApp: LegoApp = {
+          ...app,
+          currentVersion: newVer.versionNumber,
+          versions: updatedVersions,
+          updatedAt: new Date().toISOString(),
+        };
+
+        const nextWallet: CreditWallet = {
+          ...wallet,
+          aiCredits: Math.max(0, wallet.aiCredits - 2),
+          aiUsedThisMonth: wallet.aiUsedThisMonth + 2,
+          cloudCredits: Math.max(0, wallet.cloudCredits - 1),
+        };
+
+        onUpdateApp(updatedApp);
+        onUpdateWallet(nextWallet);
+
+        setChecklistTasks(prev => [
+          ...prev.map(t => ({ ...t, done: true })),
+          { id: 't-' + Date.now(), text: `Implementasi: ${text.substring(0, 45)}`, done: true }
+        ]);
       }
-
-      const newVer: AppVersion = data.version;
-      const updatedVersions = [...app.versions, newVer];
-      const updatedApp: LegoApp = {
-        ...app,
-        currentVersion: newVer.versionNumber,
-        versions: updatedVersions,
-        updatedAt: new Date().toISOString(),
-      };
-
-      const nextWallet: CreditWallet = {
-        ...wallet,
-        aiCredits: Math.max(0, wallet.aiCredits - 2),
-        aiUsedThisMonth: wallet.aiUsedThisMonth + 2,
-        cloudCredits: Math.max(0, wallet.cloudCredits - 1),
-      };
-
-      onUpdateApp(updatedApp);
-      onUpdateWallet(nextWallet);
-
-      // Add task to checklist
-      setChecklistTasks(prev => [
-        ...prev.map(t => ({ ...t, done: true })),
-        { id: 't-' + Date.now(), text: `Implementasi: ${text.substring(0, 45)}`, done: true }
-      ]);
 
       setPromptInput('');
     } catch (err: any) {
@@ -168,6 +213,11 @@ export function StudioView({
   };
 
   const handlePublish = () => {
+    if (isCleanBlank) {
+      alert('Aplikasi masih kosong. Silakan generate aplikasi terlebih dahulu.');
+      return;
+    }
+
     const updatedApp: LegoApp = {
       ...app,
       isPublished: true,
@@ -191,6 +241,7 @@ export function StudioView({
   };
 
   const handleDataChangeFromPreview = (newTables: TableDefinition[]) => {
+    if (isCleanBlank) return;
     const updatedVersions = app.versions.map(v => {
       if (v.versionNumber !== app.currentVersion) return v;
       return { ...v, tables: newTables };
@@ -202,208 +253,32 @@ export function StudioView({
     });
   };
 
-  // HOME / NEW BUILD STATE (Image 2)
-  if (isHomeState) {
-    return (
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#fafafa] dot-grid">
-        {/* Top Header */}
-        <header className="p-4 px-6 border-b border-slate-200/60 flex items-center justify-between bg-white/70 backdrop-blur-xs">
-          <span className="text-sm font-semibold text-slate-700">Untitled</span>
-          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span>Sakelar AI · claude-sonnet-4.6</span>
-          </div>
-        </header>
-
-        {/* Center Hero Prompt Area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-4xl mx-auto w-full space-y-10 my-auto">
-          {/* Large Prompt Card */}
-          <div className="w-full bg-white rounded-3xl border border-slate-200/80 shadow-lg p-5 space-y-4">
-            <textarea
-              rows={3}
-              value={promptInput}
-              onChange={(e) => setPromptInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendPrompt();
-                }
-              }}
-              placeholder="Build me an app... (Contoh: Aplikasi CRM lead WhatsApp consent-first dengan pipeline visual deal)"
-              className="w-full text-sm bg-transparent border-0 focus:outline-none resize-none text-slate-900 placeholder:text-slate-400 font-normal leading-relaxed"
-            />
-
-            {/* Sub-toolbar inside card */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
-              <div className="flex items-center gap-2">
-                <button 
-                  type="button"
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                  title="Tambah Konteks"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-                <button 
-                  type="button"
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                  title="Lampirkan File"
-                >
-                  <Paperclip className="w-4 h-4" />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setPromptInput('Buatkan aplikasi CRM B2B untuk UMKM dengan pipeline stages deals, kontak WhatsApp, estimasi nilai transaksi dalam Rupiah, dan verifikasi izin outreach.')}
-                  className="px-2.5 py-1 text-xs text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-lg flex items-center gap-1.5 font-medium border border-slate-200/60 transition-colors"
-                >
-                  <Wand2 className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Improve prompt</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5 text-xs text-slate-400 pr-2 border-r border-slate-200">
-                  <Layers className="w-3.5 h-3.5" />
-                  <span>Connect apps</span>
-                  <div className="flex items-center gap-1 ml-1 text-slate-600">
-                    <FigmaIcon className="w-3.5 h-3.5" />
-                    <GithubIcon className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleSendPrompt()}
-                  disabled={!promptInput.trim() || isGenerating}
-                  className={`w-9 h-9 rounded-2xl flex items-center justify-center text-white transition-all shadow-xs ${
-                    promptInput.trim() && !isGenerating 
-                      ? 'bg-slate-900 hover:bg-black active:scale-95' 
-                      : 'bg-slate-200 cursor-not-allowed'
-                  }`}
-                >
-                  <ArrowUp className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Category Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            {[
-              { label: 'Build App', prompt: 'Buatkan aplikasi manajemen inventori stok barang UMKM' },
-              { label: 'Website design', prompt: 'Buatkan landing page & form order produk digital' },
-              { label: 'Presentation', prompt: 'Buatkan portal proposal presentasi pitch deck klien' },
-              { label: 'Code', prompt: 'Buatkan REST API & CRUD tables generator' },
-            ].map(cat => (
-              <button
-                key={cat.label}
-                onClick={() => {
-                  setPromptInput(cat.prompt);
-                }}
-                className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200/80 rounded-xl shadow-2xs transition-colors flex items-center gap-1.5"
-              >
-                <span>{cat.label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Templates Section (Image 2) */}
-          <div className="w-full space-y-4 pt-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-800">Templates</h3>
-              <button 
-                onClick={onExitHomeState}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800"
-              >
-                View all
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {allApps.map((templateApp, idx) => (
-                <div
-                  key={templateApp.id}
-                  onClick={() => {
-                    onSelectApp(templateApp.id);
-                    onExitHomeState();
-                  }}
-                  className="group cursor-pointer bg-white rounded-2xl border border-slate-200/80 hover:border-blue-400 p-3 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-3"
-                >
-                  {/* Mockup Preview Visual */}
-                  <div className="h-32 rounded-xl bg-linear-to-b from-slate-100 to-slate-50 border border-slate-200/60 p-2 flex flex-col justify-between overflow-hidden relative group-hover:scale-[1.02] transition-transform">
-                    <div className="flex items-center justify-between">
-                      <span className="w-2 h-2 rounded-full bg-blue-500" />
-                      <span className="text-[9px] font-mono font-bold text-slate-400">v{templateApp.currentVersion}</span>
-                    </div>
-                    <div className="space-y-1 text-center py-2">
-                      <div className="text-xs font-bold text-slate-800 line-clamp-1">{templateApp.name}</div>
-                      <div className="text-[10px] text-slate-500 line-clamp-2">{templateApp.description}</div>
-                    </div>
-                    <div className="flex justify-center gap-1">
-                      <span className="h-1 w-6 rounded-full bg-slate-300" />
-                      <span className="h-1 w-3 rounded-full bg-blue-400" />
-                    </div>
-                  </div>
-
-                  {/* Title & Author */}
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                      {templateApp.name}
-                    </h4>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <div className="w-4 h-4 rounded-full bg-amber-500 text-white font-bold text-[9px] flex items-center justify-center">
-                        {idx === 0 ? 'B' : idx === 1 ? 'D' : 'A'}
-                      </div>
-                      <span className="text-[11px] text-slate-500">
-                        {idx === 0 ? 'Om Bobi' : idx === 1 ? 'Dian Creative' : 'Ahmad Sales'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  // ACTIVE STUDIO VIEW (Image 1 & Image 3)
   return (
     <main className="flex-1 flex flex-col md:flex-row h-screen overflow-hidden bg-white">
       {/* MIDDLE COLUMN: Chat, Thinking & Specification (Image 1 & 3 left) */}
-      <div className={`border-r border-slate-200/80 flex flex-col shrink-0 h-full bg-white select-none transition-all duration-200 ${
-        activeNavTab === 'chat' 
-          ? 'w-full md:w-[580px] lg:w-[640px]' 
-          : 'w-full md:w-[460px] lg:w-[500px]'
-      }`}>
+      <div className="w-full md:w-[440px] lg:w-[480px] border-r border-slate-200/80 flex flex-col shrink-0 h-full bg-white select-none transition-all duration-200">
         {/* Top Header Bar */}
         <div className="p-3.5 px-5 border-b border-slate-200/70 flex items-center justify-between gap-2 bg-white">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-bold text-slate-900 tracking-tight">
-              {app.name}..
+              {app.name}
             </h2>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-              v{currentVersion.versionNumber}
+              {isCleanBlank ? 'Draft' : `v${currentVersion?.versionNumber}`}
             </span>
             <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
-              {activeNavTab === 'chat' ? '💬 Chat' : '🖥️ Studio'}
+              Menu 2 Studio
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">claude-sonnet-4.6</span>
-            <button 
-              onClick={() => onExitHomeState()}
-              className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-md"
-              title="Ganti Layout / Kembali"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
         {/* Scrollable Content Body */}
         <div className="flex-1 p-5 overflow-y-auto space-y-5 text-slate-800 text-xs leading-relaxed">
-          {/* Thinking 4 sec Disclosure (Image 1) */}
+          {/* Thinking Disclosure */}
           <div className="border border-slate-200/90 rounded-2xl overflow-hidden bg-slate-50/50">
             <button
               onClick={() => setIsThinkingOpen(!isThinkingOpen)}
@@ -411,76 +286,82 @@ export function StudioView({
             >
               <div className="flex items-center gap-2 font-medium text-[11px]">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                <span>Thinking 4 sec</span>
+                <span>
+                  {isCleanBlank ? 'AI Assistant Ready' : 'Thinking trace (Sakelar AI)'}
+                </span>
               </div>
               {isThinkingOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
 
             {isThinkingOpen && (
               <div className="p-3 pt-0 text-[11px] text-slate-600 font-mono space-y-1.5 border-t border-slate-200/50">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400">📄</span>
-                  <span>Checked <strong className="text-slate-800">design-system.json</strong> for existing tokens</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400">🔍</span>
-                  <span>Called <strong className="text-slate-800">component.search(&quot;pipeline&quot;, &quot;leads&quot;)</strong> - 3 matches found</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400">🖼️</span>
-                  <span>Fetched icon set from Lucide, filtered to native-weight variants</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400">⚙️</span>
-                  <span>Resolved Layout grid - 16px margins, 12px gutter, native spacing</span>
-                </div>
+                {isCleanBlank ? (
+                  <div className="py-1 text-slate-500">
+                    Kanvas project baru siap dibangun. Menunggu instruksi pertama dari Anda...
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400">📄</span>
+                      <span>Checked <strong className="text-slate-800">design-system.json</strong> for modern components</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400">🔍</span>
+                      <span>Resolved data columns: WhatsApp click-to-chat, currency, badges</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-400">🖼️</span>
+                      <span>Applied polished responsive Kanban & data table views</span>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
 
-          {/* Defining the Initial Scope (Image 1 text) */}
+          {/* Specification Scope */}
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-slate-900">Defining the Initial Scope</h3>
+            <h3 className="text-sm font-bold text-slate-900">
+              {isCleanBlank ? 'Mulai Membangun Aplikasi' : 'Defining the Scope & Features'}
+            </h3>
             <p className="text-slate-600 leading-normal">
-              {currentVersion.changelog || `I'm starting with the core workflow for ${app.name}. Structuring it around interactive pipeline cards, Rupiah metrics, and verified WhatsApp consent, following native mobile & desktop conventions.`}
+              {isCleanBlank 
+                ? 'Ketik instruksi di bawah ini untuk merancang aplikasi web baru Anda. AI akan otomatis membuat komponen visual, database lokal, dan metrik analitik.'
+                : (currentVersion?.changelog || `Workflow untuk ${app.name} telah tersusun secara visual dan interaktif.`)}
             </p>
 
-            <div>
-              <h4 className="font-bold text-slate-900 mb-1.5">First Version Features:</h4>
-              <ul className="space-y-1.5 text-slate-600">
-                <li className="flex items-start gap-1.5">
-                  <span className="text-slate-400">•</span>
-                  <span>Visual pipeline & Kanban stages with deal value in IDR (Rp)</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-slate-400">•</span>
-                  <span>Database leads with WhatsApp click-to-chat & consent tracking</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-slate-400">•</span>
-                  <span>Summary KPI stats row (Total Prospek, Deal Aktif, Omset Pipeline)</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-slate-400">•</span>
-                  <span>Tap-to-expand details with instant form data insertion</span>
-                </li>
-                <li className="flex items-start gap-1.5">
-                  <span className="text-slate-400">•</span>
-                  <span>Responsive layout for mobile, tablet, and desktop</span>
-                </li>
-              </ul>
-            </div>
-
-            <p className="text-slate-500 font-medium pt-1">Let&apos;s implement this design:</p>
+            {!isCleanBlank && currentVersion && (
+              <div>
+                <h4 className="font-bold text-slate-900 mb-1.5">Fitur Tersedia:</h4>
+                <ul className="space-y-1.5 text-slate-600">
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-slate-400">•</span>
+                    <span>Visual pipeline & stages interaktif dengan formatting Rupiah</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-slate-400">•</span>
+                    <span>Database tabel dengan WhatsApp click-to-chat langsung</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-slate-400">•</span>
+                    <span>Metrik performa KPI row dengan tren</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <span className="text-slate-400">•</span>
+                    <span>Formulir tambah data interaktif dengan validasi</span>
+                  </li>
+                </ul>
+              </div>
+            )}
           </div>
 
-          {/* Progress Checklist Card (Image 1: 2/4 done) */}
+          {/* Progress Checklist Card */}
           {isChecklistOpen && (
             <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs p-3.5 space-y-3">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800">
                   <span className="text-blue-600">≡</span>
-                  <span>{doneCount}/{checklistTasks.length} done</span>
+                  <span>{doneCount}/{checklistTasks.length} checklist</span>
                 </div>
                 <button 
                   onClick={() => setIsChecklistOpen(false)}
@@ -536,7 +417,7 @@ export function StudioView({
                   handleSendPrompt();
                 }
               }}
-              placeholder="Build me an app... (Ketik instruksi revisi dalam Bahasa Indonesia)"
+              placeholder={isCleanBlank ? "Ketik instruksi aplikasi baru di sini..." : "Build me an app... (Ketik instruksi revisi dalam Bahasa Indonesia)"}
               className="w-full text-xs bg-transparent border-0 focus:outline-none resize-none text-slate-900 placeholder:text-slate-400 font-normal leading-relaxed"
             />
 
@@ -589,11 +470,11 @@ export function StudioView({
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Preview & Code Canvas (Image 1 & Image 3) */}
+      {/* RIGHT COLUMN: Preview & Code Canvas */}
       <div className="flex-1 flex flex-col h-full bg-[#f8f9fa] overflow-hidden">
         {/* Top Header Bar */}
         <div className="p-3 px-6 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 bg-white">
-          {/* Segmented Toggle: Preview / Code (Image 1 & 3) */}
+          {/* Segmented Toggle: Preview / Code */}
           <div className="flex items-center p-0.5 bg-slate-100 rounded-xl border border-slate-200/80 text-xs font-semibold">
             <button
               onClick={() => setRightTab('preview')}
@@ -621,12 +502,12 @@ export function StudioView({
 
           {/* Actions & Publish Button */}
           <div className="flex items-center gap-2">
-            {rightTab === 'preview' && (
+            {rightTab === 'preview' && !isCleanBlank && (
               <div className="flex items-center p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-slate-600 mr-2">
                 <button
                   onClick={() => setDeviceMode('mobile')}
                   className={`p-1 rounded-md transition-colors ${deviceMode === 'mobile' ? 'bg-white text-blue-600 shadow-2xs' : 'hover:text-slate-900'}`}
-                  title="Mobile View (375px)"
+                  title="Mobile View (390px)"
                 >
                   <Smartphone className="w-3.5 h-3.5" />
                 </button>
@@ -647,72 +528,121 @@ export function StudioView({
               </div>
             )}
 
-            <button
-              onClick={() => {
-                const url = `${window.location.origin}/p/${app.publishedSlug || app.slug}`;
-                navigator.clipboard.writeText(url);
-                setCopiedLink(true);
-                setTimeout(() => setCopiedLink(false), 3000);
-              }}
-              className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
-              title="Salin Link"
-            >
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            </button>
+            {!isCleanBlank && (
+              <>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/p/${app.publishedSlug || app.slug}`;
+                    navigator.clipboard.writeText(url);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 3000);
+                  }}
+                  className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                  title="Salin Link"
+                >
+                  {copiedLink ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                </button>
 
-            <a
-              href={`/p/${app.publishedSlug || app.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
-              title="Buka di Tab Baru"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </a>
+                <a
+                  href={`/p/${app.publishedSlug || app.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+                  title="Buka di Tab Baru"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </>
+            )}
 
             <button
               onClick={handlePublish}
-              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all hover:scale-102 flex items-center gap-1.5"
+              disabled={isCleanBlank}
+              className={`px-4 py-1.5 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 ${
+                isCleanBlank 
+                  ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-102'
+              }`}
             >
               <span>Publish</span>
             </button>
           </div>
         </div>
 
-        {/* Canvas Area with Dot-Grid Background (Image 1 & Image 3) */}
-        <div className="flex-1 p-6 flex items-center justify-center overflow-auto dot-grid">
+        {/* Canvas Area with Dot-Grid Background */}
+        <div className="flex-1 p-4 md:p-6 flex items-center justify-center overflow-auto dot-grid">
           {rightTab === 'preview' ? (
-            /* PREVIEW TAB (Image 1) */
-            <div 
-              className={`transition-all duration-300 w-full ${
-                deviceMode === 'mobile' ? 'max-w-[390px] border-8 border-slate-900 rounded-[44px] overflow-hidden shadow-2xl bg-white ring-1 ring-slate-900/10' :
-                deviceMode === 'tablet' ? 'max-w-[760px] border-6 border-slate-800 rounded-3xl overflow-hidden shadow-xl bg-white' :
-                'max-w-full rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden'
-              }`}
-            >
-              {deviceMode === 'mobile' && (
-                <div className="bg-white text-slate-900 px-6 pt-3 pb-1 text-[11px] flex items-center justify-between font-semibold border-b border-slate-100">
-                  <span>9:41</span>
-                  {/* Dynamic Island / Speaker */}
-                  <div className="w-20 h-4 bg-slate-900 rounded-full" />
-                  <div className="flex items-center gap-1 text-[10px]">
-                    <span>5G</span>
-                    <div className="w-4 h-2.5 border border-slate-800 rounded-xs p-0.5 flex items-center">
-                      <div className="w-full h-full bg-slate-800" />
+            /* PREVIEW TAB */
+            isCleanBlank ? (
+              /* Ultra-clean Blank Canvas State (No messy template code!) */
+              <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200/90 shadow-sm p-8 flex flex-col items-center text-center space-y-5">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-2xs">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+
+                <div className="space-y-1.5 max-w-sm">
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Kanvas Bersih: Siap Membangun
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Studio Anda bersih dari kode. Ketik ide aplikasi Anda pada prompt bar di samping atau klik inspirasi cepat di bawah untuk mulai membuat:
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full pt-1">
+                  {[
+                    { label: '💬 CRM WhatsApp', prompt: 'Buatkan aplikasi CRM WhatsApp dengan tracking leads dan pipeline visual.' },
+                    { label: '📦 Kasir & Inventori', prompt: 'Buatkan aplikasi manajemen inventori stok barang dan kasir toko retail.' },
+                    { label: '🗓️ Booking Jadwal', prompt: 'Buatkan sistem reservasi booking jadwal konsultasi dan nomor antrean.' },
+                    { label: '📑 Portal Invoice', prompt: 'Buatkan portal invoice tagihan klien dengan status pembayaran dan approval.' },
+                  ].map((item) => (
+                    <button
+                      key={item.label}
+                      onClick={() => setPromptInput(item.prompt)}
+                      className="p-3 text-left rounded-xl border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/30 transition-all text-xs group"
+                    >
+                      <div className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
+                        {item.label}
+                      </div>
+                      <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                        {item.prompt}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              /* Active App Rendered Inside Device Frame */
+              <div 
+                className={`transition-all duration-300 w-full ${
+                  deviceMode === 'mobile' ? 'max-w-[390px] border-8 border-slate-900 rounded-[44px] overflow-hidden shadow-2xl bg-white ring-1 ring-slate-900/10' :
+                  deviceMode === 'tablet' ? 'max-w-[760px] border-6 border-slate-800 rounded-3xl overflow-hidden shadow-xl bg-white' :
+                  'max-w-full rounded-2xl border border-slate-200 shadow-sm bg-white overflow-hidden'
+                }`}
+              >
+                {deviceMode === 'mobile' && (
+                  <div className="bg-white text-slate-900 px-6 pt-3 pb-1 text-[11px] flex items-center justify-between font-semibold border-b border-slate-100">
+                    <span>9:41</span>
+                    <div className="w-20 h-4 bg-slate-900 rounded-full" />
+                    <div className="flex items-center gap-1 text-[10px]">
+                      <span>5G</span>
+                      <div className="w-4 h-2.5 border border-slate-800 rounded-xs p-0.5 flex items-center">
+                        <div className="w-full h-full bg-slate-800" />
+                      </div>
                     </div>
                   </div>
+                )}
+                
+                <div className="max-h-[760px] overflow-y-auto">
+                  <InteractiveAppRenderer 
+                    version={currentVersion!} 
+                    onDataChange={handleDataChangeFromPreview}
+                  />
                 </div>
-              )}
-              
-              <div className="max-h-[760px] overflow-y-auto">
-                <InteractiveAppRenderer 
-                  version={currentVersion} 
-                  onDataChange={handleDataChangeFromPreview}
-                />
               </div>
-            </div>
+            )
           ) : (
-            /* CODE TAB (Image 3) */
+            /* CODE TAB */
             <div className="w-full h-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
               <div className="p-3 px-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 text-xs">
                 <span className="font-mono text-slate-600 font-semibold">{app.slug}.tsx</span>

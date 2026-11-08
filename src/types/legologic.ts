@@ -100,7 +100,7 @@ export interface LegoApp {
   currentVersion: number;
   versions: AppVersion[];
   isPublished: boolean;
-  publishedSlug: string;
+  publishedSlug?: string;
   publishedAt?: string;
   createdAt: string;
   updatedAt: string;

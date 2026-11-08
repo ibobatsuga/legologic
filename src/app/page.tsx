@@ -4,19 +4,23 @@ import React, { useState, useEffect } from 'react';
 import { 
   LegoApp, CreditWallet, Organization, User, TeamMember, AuditLog 
 } from '@/types/legologic';
-import { ALL_TEMPLATES, SATU_PIPELINE_APP } from '@/lib/templates';
+import { ALL_TEMPLATES, SATU_PIPELINE_APP, CREATE_BLANK_APP } from '@/lib/templates';
 import { Sidebar } from '@/components/Sidebar';
 import { StudioView } from '@/components/StudioView';
+import { ChatView } from '@/components/ChatView';
+import { LibraryView } from '@/components/LibraryView';
 import { BillingModal } from '@/components/BillingModal';
 import { TeamModal } from '@/components/TeamModal';
 import { AuthModal } from '@/components/AuthModal';
 import { AuthUserProfile } from '@/lib/firebase';
 
 export default function Home() {
-  const [apps, setApps] = useState<LegoApp[]>(ALL_TEMPLATES);
-  const [currentAppId, setCurrentAppId] = useState<string>(SATU_PIPELINE_APP.id);
+  // Initial app is a clean blank project ("Project Baru")
+  const [apps, setApps] = useState<LegoApp[]>(() => [CREATE_BLANK_APP(), ...ALL_TEMPLATES]);
+  const [currentAppId, setCurrentAppId] = useState<string>('app-new-blank');
+  
+  // Navigation tabs: 'chat' (Menu 1), 'studio' (Menu 2), 'library' (Menu 3)
   const [currentNavTab, setCurrentNavTab] = useState<string>('chat');
-  const [isHomeState, setIsHomeState] = useState<boolean>(true); // Default: Project Baru
   
   const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [isTeamOpen, setIsTeamOpen] = useState(false);
@@ -60,8 +64,8 @@ export default function Home() {
       timestamp: '2026-11-08T10:00:00Z',
       userId: 'user-bobi',
       userName: 'Om Bobi',
-      action: 'Aplikasi SatuPipeline Siap',
-      details: 'Template CRM consent-first dengan pipeline visual kanban siap digunakan.',
+      action: 'Project Baru Siap',
+      details: 'Studio LegoLogic kanvas bersih siap menerima instruksi.',
       type: 'build',
     },
     {
@@ -82,13 +86,19 @@ export default function Home() {
       if (savedApps) {
         const parsed = JSON.parse(savedApps);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setApps(parsed);
-          setCurrentAppId(parsed[0].id);
+          // If blank app isn't in saved list, keep blank app available
+          const hasBlank = parsed.some(a => a.id === 'app-new-blank');
+          const merged = hasBlank ? parsed : [CREATE_BLANK_APP(), ...parsed];
+          setApps(merged);
         }
       }
       const savedWallet = localStorage.getItem('legologic_wallet_v1');
       if (savedWallet) {
         setWallet(JSON.parse(savedWallet));
+      }
+      const savedUser = localStorage.getItem('legologic_user_v1');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
       }
     } catch (e) {
       console.error(e);
@@ -103,7 +113,14 @@ export default function Home() {
   };
 
   const handleUpdateApp = (updatedApp: LegoApp) => {
-    const next = apps.map(a => a.id === updatedApp.id ? updatedApp : a);
+    const exists = apps.some(a => a.id === updatedApp.id);
+    let next: LegoApp[];
+    if (exists) {
+      next = apps.map(a => a.id === updatedApp.id ? updatedApp : a);
+    } else {
+      next = [updatedApp, ...apps];
+    }
+    setCurrentAppId(updatedApp.id);
     saveAppsToStorage(next);
   };
 
@@ -129,7 +146,6 @@ export default function Home() {
     aiCreditsAdded: number,
     method: string
   ) => {
-    // Update active app plan
     const updatedApp = {
       ...currentApp,
       plan: plan,
@@ -138,7 +154,6 @@ export default function Home() {
     };
     handleUpdateApp(updatedApp);
 
-    // Update wallet credits
     const updatedWallet: CreditWallet = {
       ...wallet,
       aiCredits: wallet.aiCredits + aiCreditsAdded,
@@ -178,24 +193,51 @@ export default function Home() {
     });
   };
 
-  const currentApp = apps.find(a => a.id === currentAppId) || apps[0] || SATU_PIPELINE_APP;
+  // Handler to create a brand new clean project
+  const handleNewBuild = () => {
+    const blank = CREATE_BLANK_APP();
+    setApps(prev => [blank, ...prev.filter(a => a.id !== blank.id)]);
+    setCurrentAppId(blank.id);
+    setCurrentNavTab('studio');
+  };
+
+  // Handler when user opens an app from chat or library into Studio
+  const handleOpenAppInStudio = (appToOpen: LegoApp) => {
+    const exists = apps.some(a => a.id === appToOpen.id);
+    if (!exists) {
+      setApps(prev => [appToOpen, ...prev]);
+    }
+    setCurrentAppId(appToOpen.id);
+    setCurrentNavTab('studio');
+  };
+
+  // Handler to use a template
+  const handleUseTemplate = (template: LegoApp) => {
+    const cloned: LegoApp = {
+      ...template,
+      id: 'app-' + Date.now(),
+      slug: template.slug + '-' + Math.floor(100 + Math.random() * 900),
+      name: template.name + ' (Kloning)',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isPublished: false,
+    };
+    handleUpdateApp(cloned);
+    setCurrentAppId(cloned.id);
+    setCurrentNavTab('studio');
+  };
+
+  const currentApp = apps.find(a => a.id === currentAppId) || apps[0] || CREATE_BLANK_APP();
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] antialiased">
-      {/* Sleek Left Sidebar (Matching user screenshots) */}
+      {/* Sleek Left Sidebar */}
       <Sidebar
-        currentTab={isHomeState ? 'new' : currentNavTab}
+        currentTab={currentNavTab}
         onSelectTab={(tab) => {
           setCurrentNavTab(tab);
-          if (tab === 'templates' || tab === 'library') {
-            setIsHomeState(true);
-          } else {
-            setIsHomeState(false);
-          }
         }}
-        onNewBuild={() => {
-          setIsHomeState(true);
-        }}
+        onNewBuild={handleNewBuild}
         onOpenBilling={() => setIsBillingOpen(true)}
         onOpenTeam={() => setIsTeamOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
@@ -204,24 +246,60 @@ export default function Home() {
         wallet={wallet}
       />
 
-      {/* Main Studio View with 3-Column / Split Canvas (Matching user screenshots) */}
-      <StudioView
-        app={currentApp}
-        allApps={apps}
-        wallet={wallet}
-        user={user}
-        organization={organization}
-        activeNavTab={currentNavTab}
-        onUpdateApp={handleUpdateApp}
-        onUpdateWallet={handleUpdateWallet}
-        onSelectApp={(appId) => {
-          setCurrentAppId(appId);
-          setIsHomeState(false);
-        }}
-        onOpenBilling={() => setIsBillingOpen(true)}
-        isHomeState={isHomeState}
-        onExitHomeState={() => setIsHomeState(false)}
-      />
+      {/* Main View Area depending on active menu */}
+      {currentNavTab === 'chat' ? (
+        /* MENU 1: Chat Assistant with Claude Sonnet 4.6 */
+        <ChatView
+          wallet={wallet}
+          user={user}
+          onOpenInStudio={handleOpenAppInStudio}
+          onOpenBilling={() => setIsBillingOpen(true)}
+        />
+      ) : currentNavTab === 'studio' ? (
+        /* MENU 2: Studio View (Clean Canvas by default, or active app) */
+        <StudioView
+          app={currentApp}
+          allApps={apps}
+          wallet={wallet}
+          user={user}
+          organization={organization}
+          activeNavTab="studio"
+          onUpdateApp={handleUpdateApp}
+          onUpdateWallet={handleUpdateWallet}
+          onSelectApp={(appId) => {
+            setCurrentAppId(appId);
+          }}
+          onOpenBilling={() => setIsBillingOpen(true)}
+        />
+      ) : currentNavTab === 'library' || currentNavTab === 'templates' ? (
+        /* MENU 3: Library (Recent Projects + Templates Gallery without chat box) */
+        <LibraryView
+          recentApps={apps.filter(a => a.id !== 'app-new-blank')}
+          templates={ALL_TEMPLATES}
+          onOpenAppInStudio={(appId) => {
+            setCurrentAppId(appId);
+            setCurrentNavTab('studio');
+          }}
+          onUseTemplate={handleUseTemplate}
+          onNewBuild={handleNewBuild}
+        />
+      ) : (
+        /* Fallback to Studio */
+        <StudioView
+          app={currentApp}
+          allApps={apps}
+          wallet={wallet}
+          user={user}
+          organization={organization}
+          activeNavTab={currentNavTab}
+          onUpdateApp={handleUpdateApp}
+          onUpdateWallet={handleUpdateWallet}
+          onSelectApp={(appId) => {
+            setCurrentAppId(appId);
+          }}
+          onOpenBilling={() => setIsBillingOpen(true)}
+        />
+      )}
 
       {/* Auth Modal (Firebase Google Sign In + Email) */}
       <AuthModal

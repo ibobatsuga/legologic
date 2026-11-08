@@ -1,6 +1,16 @@
 import { AppVersion } from '@/types/legologic';
 
-export function generateAppSourceCode(version: AppVersion): string {
+export function generateAppSourceCode(version?: AppVersion): string {
+  if (!version || !version.tables || version.tables.length === 0) {
+    return `// ——————————————————————————————————————————————————————————
+// LegoLogic Studio — Project Baru
+// Kanvas Bersih: Belum ada kode yang dihasilkan.
+// ——————————————————————————————————————————————————————————
+//
+// Masukkan instruksi pada prompt bar samping atau tab Chat untuk mulai
+// menghasilkan antarmuka web, skema database, dan logika interaktif.`;
+  }
+
   const tableTypes = version.tables.map(t => {
     const fields = t.columns.map(c => {
       let tsType = 'string';
