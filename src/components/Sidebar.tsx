@@ -35,11 +35,10 @@ export function Sidebar({
     { id: 'chat', label: 'Chat', icon: MessageSquare },
     { id: 'studio', label: 'Studio', icon: Monitor },
     { id: 'library', label: 'Library', icon: FolderGit2 },
-    { id: 'usage', label: 'Usage / Kredit', icon: Zap, badge: `${wallet.aiCredits} AI` },
     { id: 'database', label: 'Database', icon: Database },
     { id: 'history', label: 'History & Versi', icon: History },
+    { id: 'usage', label: 'Usage / Kredit', icon: Zap, badge: `${wallet.aiCredits} AI` },
     { id: 'connectors', label: 'Connectors', icon: Layers },
-    { id: 'templates', label: 'Templates', icon: Sparkles },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

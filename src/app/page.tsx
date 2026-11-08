@@ -9,6 +9,11 @@ import { Sidebar } from '@/components/Sidebar';
 import { StudioView } from '@/components/StudioView';
 import { ChatView } from '@/components/ChatView';
 import { LibraryView } from '@/components/LibraryView';
+import { UsageView } from '@/components/UsageView';
+import { DatabaseView } from '@/components/DatabaseView';
+import { HistoryView } from '@/components/HistoryView';
+import { ConnectorsView } from '@/components/ConnectorsView';
+import { SettingsView } from '@/components/SettingsView';
 import { BillingModal } from '@/components/BillingModal';
 import { TeamModal } from '@/components/TeamModal';
 import { AuthModal } from '@/components/AuthModal';
@@ -227,6 +232,22 @@ export default function Home() {
     setCurrentNavTab('studio');
   };
 
+  const handleRollbackToVersion = (versionNumber: number) => {
+    const updatedApp: LegoApp = {
+      ...currentApp,
+      currentVersion: versionNumber,
+      updatedAt: new Date().toISOString(),
+    };
+    handleUpdateApp(updatedApp);
+    handleAddAuditLog({
+      userId: user.id,
+      userName: user.name,
+      action: `Rollback ke Versi v${versionNumber}`,
+      details: `Mengembalikan aplikasi "${currentApp.name}" ke konfigurasi versi v${versionNumber}`,
+      type: 'rollback',
+    });
+  };
+
   const currentApp = apps.find(a => a.id === currentAppId) || apps[0] || CREATE_BLANK_APP();
 
   return (
@@ -272,7 +293,7 @@ export default function Home() {
           onOpenBilling={() => setIsBillingOpen(true)}
           onNavigateToTab={(tab) => setCurrentNavTab(tab)}
         />
-      ) : currentNavTab === 'library' || currentNavTab === 'templates' ? (
+      ) : currentNavTab === 'library' ? (
         /* MENU 3: Library (Recent Projects + Templates Gallery without chat box) */
         <LibraryView
           recentApps={apps.filter(a => a.id !== 'app-new-blank')}
@@ -284,8 +305,44 @@ export default function Home() {
           onUseTemplate={handleUseTemplate}
           onNewBuild={handleNewBuild}
         />
+      ) : currentNavTab === 'database' ? (
+        /* MENU 4: Database Management & Skema Data */
+        <DatabaseView
+          currentApp={currentApp}
+          allApps={apps}
+          onSelectApp={(appId) => setCurrentAppId(appId)}
+          onUpdateApp={handleUpdateApp}
+          onNavigateToTab={(tab) => setCurrentNavTab(tab)}
+        />
+      ) : currentNavTab === 'history' ? (
+        /* MENU 5: History Versi & Audit Log */
+        <HistoryView
+          currentApp={currentApp}
+          auditLogs={auditLogs}
+          onRollbackToVersion={handleRollbackToVersion}
+          onNavigateToTab={(tab) => setCurrentNavTab(tab)}
+        />
+      ) : currentNavTab === 'usage' ? (
+        /* MENU 6: Usage & Manajemen Kredit */
+        <UsageView
+          wallet={wallet}
+          currentApp={currentApp}
+          onOpenBilling={() => setIsBillingOpen(true)}
+        />
+      ) : currentNavTab === 'connectors' ? (
+        /* MENU 7: Connectors & Integrasi Bisnis */
+        <ConnectorsView />
+      ) : currentNavTab === 'settings' ? (
+        /* MENU 8: Settings Profil & Workspace */
+        <SettingsView
+          user={user}
+          organization={organization}
+          teamMembers={teamMembers}
+          onOpenTeam={() => setIsTeamOpen(true)}
+          onOpenAuth={() => setIsAuthOpen(true)}
+        />
       ) : (
-        /* Fallback to Studio */
+        /* Fallback */
         <StudioView
           app={currentApp}
           allApps={apps}
