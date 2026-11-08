@@ -1,69 +1,231 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { 
+  LegoApp, CreditWallet, Organization, User, TeamMember, AuditLog 
+} from '@/types/legologic';
+import { ALL_TEMPLATES, SATU_PIPELINE_APP } from '@/lib/templates';
+import { Sidebar } from '@/components/Sidebar';
+import { StudioView } from '@/components/StudioView';
+import { BillingModal } from '@/components/BillingModal';
+import { TeamModal } from '@/components/TeamModal';
 
 export default function Home() {
+  const [apps, setApps] = useState<LegoApp[]>(ALL_TEMPLATES);
+  const [currentAppId, setCurrentAppId] = useState<string>(SATU_PIPELINE_APP.id);
+  const [currentNavTab, setCurrentNavTab] = useState<string>('studio');
+  const [isHomeState, setIsHomeState] = useState<boolean>(false);
+  
+  const [isBillingOpen, setIsBillingOpen] = useState(false);
+  const [isTeamOpen, setIsTeamOpen] = useState(false);
+
+  const [user] = useState<User>({
+    id: 'user-bobi',
+    name: 'Om Bobi',
+    email: 'bobi@legologic.id',
+    role: 'OWNER',
+  });
+
+  const [organization, setOrganization] = useState<Organization>({
+    id: 'org-1',
+    name: 'Nalarasa Studio',
+    slug: 'nalarasa',
+    plan: 'STARTER',
+    ownerId: 'user-bobi',
+  });
+
+  const [wallet, setWallet] = useState<CreditWallet>({
+    aiCredits: 50,
+    aiMaxCredits: 150,
+    cloudCredits: 450,
+    cloudMaxCredits: 500,
+    aiUsedThisMonth: 15,
+    cloudUsedThisMonth: 50,
+    plan: 'STARTER',
+    renewalDate: '2026-12-08',
+  });
+
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
+    { id: 'tm-1', name: 'Om Bobi', email: 'bobi@legologic.id', role: 'OWNER', status: 'active', joinedAt: '2026-11-01' },
+    { id: 'tm-2', name: 'Ahmad Sales', email: 'ahmad@nalarasa.com', role: 'MEMBER', status: 'active', joinedAt: '2026-11-03' },
+    { id: 'tm-3', name: 'Dian Designer', email: 'dian@nalarasa.com', role: 'MEMBER', status: 'active', joinedAt: '2026-11-05' },
+  ]);
+
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([
+    {
+      id: 'log-1',
+      timestamp: '2026-11-08T10:00:00Z',
+      userId: 'user-bobi',
+      userName: 'Om Bobi',
+      action: 'Aplikasi SatuPipeline Siap',
+      details: 'Template CRM consent-first dengan pipeline visual kanban siap digunakan.',
+      type: 'build',
+    },
+    {
+      id: 'log-2',
+      timestamp: '2026-11-08T09:30:00Z',
+      userId: 'user-bobi',
+      userName: 'Om Bobi',
+      action: 'Inisialisasi Model AI',
+      details: 'Terkoneksi ke gateway Sakelar AI dengan model claude-sonnet-4.6.',
+      type: 'build',
+    }
+  ]);
+
+  // Load from localStorage if present
+  useEffect(() => {
+    try {
+      const savedApps = localStorage.getItem('legologic_apps_v1');
+      if (savedApps) {
+        const parsed = JSON.parse(savedApps);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setApps(parsed);
+          setCurrentAppId(parsed[0].id);
+        }
+      }
+      const savedWallet = localStorage.getItem('legologic_wallet_v1');
+      if (savedWallet) {
+        setWallet(JSON.parse(savedWallet));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const saveAppsToStorage = (updated: LegoApp[]) => {
+    setApps(updated);
+    try {
+      localStorage.setItem('legologic_apps_v1', JSON.stringify(updated));
+    } catch (e) {}
+  };
+
+  const handleUpdateApp = (updatedApp: LegoApp) => {
+    const next = apps.map(a => a.id === updatedApp.id ? updatedApp : a);
+    saveAppsToStorage(next);
+  };
+
+  const handleUpdateWallet = (updatedWallet: CreditWallet) => {
+    setWallet(updatedWallet);
+    try {
+      localStorage.setItem('legologic_wallet_v1', JSON.stringify(updatedWallet));
+    } catch (e) {}
+  };
+
+  const handleAddAuditLog = (logData: Omit<AuditLog, 'id' | 'timestamp'>) => {
+    const newLog: AuditLog = {
+      ...logData,
+      id: 'log-' + Date.now(),
+      timestamp: new Date().toISOString(),
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+  };
+
+  const handleTopUpSuccess = (aiAdded: number, cloudAdded: number, amountPaid: number, method: string) => {
+    const updatedWallet: CreditWallet = {
+      ...wallet,
+      aiCredits: wallet.aiCredits + aiAdded,
+      aiMaxCredits: Math.max(wallet.aiMaxCredits, wallet.aiCredits + aiAdded),
+      cloudCredits: wallet.cloudCredits + cloudAdded,
+    };
+    handleUpdateWallet(updatedWallet);
+    handleAddAuditLog({
+      userId: user.id,
+      userName: user.name,
+      action: 'Top Up Kredit Berhasil',
+      details: `+${aiAdded} Kredit AI, +${cloudAdded} Cloud (Bayar: Rp ${amountPaid.toLocaleString('id-ID')} via ${method.toUpperCase()})`,
+      type: 'credit',
+    });
+  };
+
+  const handleUpgradePlan = (newPlan: CreditWallet['plan']) => {
+    setOrganization(prev => ({ ...prev, plan: newPlan }));
+    const updatedWallet: CreditWallet = {
+      ...wallet,
+      plan: newPlan,
+    };
+    handleUpdateWallet(updatedWallet);
+  };
+
+  const currentApp = apps.find(a => a.id === currentAppId) || apps[0] || SATU_PIPELINE_APP;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] antialiased">
+      {/* Sleek Left Sidebar (Matching user screenshots) */}
+      <Sidebar
+        currentTab={isHomeState ? 'templates' : currentNavTab}
+        onSelectTab={(tab) => {
+          setCurrentNavTab(tab);
+          if (tab === 'templates' || tab === 'library') {
+            setIsHomeState(true);
+          } else {
+            setIsHomeState(false);
+          }
+        }}
+        onNewBuild={() => {
+          setIsHomeState(true);
+        }}
+        onOpenBilling={() => setIsBillingOpen(true)}
+        onOpenTeam={() => setIsTeamOpen(true)}
+        user={user}
+        organization={organization}
+        wallet={wallet}
+      />
+
+      {/* Main Studio View with 3-Column / Split Canvas (Matching user screenshots) */}
+      <StudioView
+        app={currentApp}
+        allApps={apps}
+        wallet={wallet}
+        user={user}
+        organization={organization}
+        onUpdateApp={handleUpdateApp}
+        onUpdateWallet={handleUpdateWallet}
+        onSelectApp={(appId) => {
+          setCurrentAppId(appId);
+          setIsHomeState(false);
+        }}
+        onOpenBilling={() => setIsBillingOpen(true)}
+        isHomeState={isHomeState}
+        onExitHomeState={() => setIsHomeState(false)}
+      />
+
+      {/* Billing Modal */}
+      <BillingModal
+        isOpen={isBillingOpen}
+        onClose={() => setIsBillingOpen(false)}
+        wallet={wallet}
+        onTopUpSuccess={handleTopUpSuccess}
+        onUpgradePlan={handleUpgradePlan}
+      />
+
+      {/* Team Modal */}
+      <TeamModal
+        isOpen={isTeamOpen}
+        onClose={() => setIsTeamOpen(false)}
+        organization={organization}
+        members={teamMembers}
+        onInviteMember={(email, name, role) => {
+          const newMember: TeamMember = {
+            id: 'tm-' + Date.now(),
+            name,
+            email,
+            role,
+            status: 'invited',
+            joinedAt: new Date().toISOString(),
+          };
+          setTeamMembers(prev => [...prev, newMember]);
+          handleAddAuditLog({
+            userId: user.id,
+            userName: user.name,
+            action: 'Undang Anggota Tim',
+            details: `Mengundang ${email} sebagai peran ${role}`,
+            type: 'team',
+          });
+        }}
+        onRemoveMember={(id) => {
+          setTeamMembers(prev => prev.filter(m => m.id !== id));
+        }}
+      />
     </div>
   );
 }

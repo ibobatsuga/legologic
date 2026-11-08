@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LegoLogic — App Maker (Prompt → Web App)
 
-## Getting Started
+<p align="center">
+  <img src="public/legologic-logo.webp" alt="LegoLogic Logo" width="120" />
+</p>
 
-First, run the development server:
+> **"Prompt → Web App Bisnis Siap Pakai dalam Hitungan Menit."**
+> Ditenagai oleh model **Claude 3.5 / 3.7 / Sonnet 4.6** via gateway **Sakelar AI**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🌟 Tentang LegoLogic
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+LegoLogic adalah builder web app berbasis prompt yang dirancang khusus untuk pemilik bisnis non-teknis, UMKM, dan agensi di Indonesia. Pengguna cukup mengetikkan kebutuhan dalam Bahasa Indonesia, dan LegoLogic akan merancang arsitektur data, layout visual, logika bisnis, dan langsung menyajikan preview interaktif yang bisa diisi data serta dipublikasikan.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🧱 Filosofi Brand
+Aplikasi disusun dari balok-balok fungsional (auth, tabel data, alur kanban pipeline, pembayaran, dan halaman publik), selayaknya menyusun balok Lego.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🚀 Fitur Utama (MVP)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **AI Studio Builder (Sakelar AI `claude-sonnet-4.6`)**
+   - Mode interaktif: *Build*, *Plan*, dan *Debug*.
+   - Transparansi proses berpikir (*Thinking Trace*): analisis token desain, pencarian komponen, pemilihan icon Lucide, dan grid resolution.
+   - Progress checklist interaktif (*X/Y done*).
+   - Prompt input melayang dengan tombol *Improve Prompt*.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Dual-View Canvas: Preview Interaktif & `<> Code`**
+   - **Preview Live:** Render aplikasi secara responsif dengan frame iPhone (375px), Tablet (768px), atau Desktop Full.
+   - **CRUD Data Langsung:** Pengguna bisa menambah record, memindahkan kartu di Kanban pipeline, mencari data, dan menghapus baris.
+   - **`<> Code` Viewer:** Menampilkan kode sumber TypeScript / React lengkap dengan nomor baris dan tombol salin.
 
-## Deploy on Vercel
+3. **Template Bisnis Awal**
+   - **SatuPipeline CRM:** Visual pipeline deal (Rupiah), outreach WhatsApp consent-first, dan log aktivitas.
+   - **Karya Agency Portal:** Deliverables milestone, approval review klien, dan status anggaran proyek.
+   - **Booking & Katalog Jasa:** Kalender reservasi salon/bengkel dan menu tarif layanan.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Model Harga Per-Aplikasi (Sekali Bayar)**
+   - **Minimal (Rp 19.000):** 1 App Aktif, 30 Kredit AI build & revisi, Subdomain .legologic.id, 250 record.
+   - **Standar (Rp 49.000) [Paling Populer]:** 1 App Aktif, 100 Kredit AI, Subdomain kustom, 2.500 record, Ekspor CSV & Version Rollback.
+   - **Optimal (Rp 99.000) [Rekomendasi]:** 1 App Aktif, 250 Kredit AI Prioritas, Subdomain bebas, Database tak terbatas, Backup otomatis & Kolaborasi tim.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. **Simulasi Pembayaran Indonesia**
+   - QRIS Nasional instan (GoPay, OVO, Dana, ShopeePay, Mobile Banking).
+   - Virtual Account otomatis (BCA, Mandiri, BRI, BNI).
+   - Hitung mundur pembayaran real-time dan notifikasi aktivasi instan.
+
+6. **Database Terisolasi & Riwayat Versi**
+   - Tiap aplikasi memiliki skema tabel terpisah.
+   - Ekspor semua data ke CSV dengan 1 klik.
+   - Riwayat versi lengkap dengan fitur **1-Click Rollback** untuk mengembalikan versi sebelumnya tanpa kehilangan histori.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript
+- **Styling:** Tailwind CSS v4 + Lucide Icons + Canvas Confetti
+- **AI Gateway:** Sakelar AI (`claude-sonnet-4.6`)
+- **Deployment:** Vercel / Node.js Standalone
+
+---
+
+## 💻 Menjalankan Secara Lokal
+
+1. **Clone repository:**
+   ```bash
+   git clone https://github.com/ibobatsuga/legologic.git
+   cd legologic
+   ```
+
+2. **Install dependensi:**
+   ```bash
+   npm install
+   ```
+
+3. **Konfigurasi Environment:**
+   Salin `.env.example` ke `.env.local` dan isi API key Sakelar AI:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+4. **Jalankan development server:**
+   ```bash
+   npm run dev
+   ```
+   Buka [http://localhost:3000](http://localhost:3000) di browser.
+
+5. **Build untuk production:**
+   ```bash
+   npm run build
+   npm start
+   ```
+
+---
+
+## 📄 Lisensi
+Hak Cipta © 2026 LegoLogic. Seluruh hak cipta dilindungi undang-undang.
