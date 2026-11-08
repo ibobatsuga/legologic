@@ -120,30 +120,37 @@ export default function Home() {
     setAuditLogs(prev => [newLog, ...prev]);
   };
 
-  const handleTopUpSuccess = (aiAdded: number, cloudAdded: number, amountPaid: number, method: string) => {
+  const handlePaymentSuccess = (
+    plan: import('@/types/legologic').AppPlan,
+    amountPaid: number,
+    aiCreditsAdded: number,
+    method: string
+  ) => {
+    // Update active app plan
+    const updatedApp = {
+      ...currentApp,
+      plan: plan,
+      isPublished: true,
+      updatedAt: new Date().toISOString(),
+    };
+    handleUpdateApp(updatedApp);
+
+    // Update wallet credits
     const updatedWallet: CreditWallet = {
       ...wallet,
-      aiCredits: wallet.aiCredits + aiAdded,
-      aiMaxCredits: Math.max(wallet.aiMaxCredits, wallet.aiCredits + aiAdded),
-      cloudCredits: wallet.cloudCredits + cloudAdded,
+      aiCredits: wallet.aiCredits + aiCreditsAdded,
+      aiMaxCredits: Math.max(wallet.aiMaxCredits, wallet.aiCredits + aiCreditsAdded),
+      cloudCredits: wallet.cloudCredits + 100,
     };
     handleUpdateWallet(updatedWallet);
+
     handleAddAuditLog({
       userId: user.id,
       userName: user.name,
-      action: 'Top Up Kredit Berhasil',
-      details: `+${aiAdded} Kredit AI, +${cloudAdded} Cloud (Bayar: Rp ${amountPaid.toLocaleString('id-ID')} via ${method.toUpperCase()})`,
+      action: `Aktivasi Paket ${plan} App`,
+      details: `Aplikasi "${currentApp.name}" diaktifkan ke paket ${plan} (+${aiCreditsAdded} Kredit AI, Bayar: Rp ${amountPaid.toLocaleString('id-ID')} via ${method})`,
       type: 'credit',
     });
-  };
-
-  const handleUpgradePlan = (newPlan: CreditWallet['plan']) => {
-    setOrganization(prev => ({ ...prev, plan: newPlan }));
-    const updatedWallet: CreditWallet = {
-      ...wallet,
-      plan: newPlan,
-    };
-    handleUpdateWallet(updatedWallet);
   };
 
   const currentApp = apps.find(a => a.id === currentAppId) || apps[0] || SATU_PIPELINE_APP;
@@ -194,8 +201,8 @@ export default function Home() {
         isOpen={isBillingOpen}
         onClose={() => setIsBillingOpen(false)}
         wallet={wallet}
-        onTopUpSuccess={handleTopUpSuccess}
-        onUpgradePlan={handleUpgradePlan}
+        currentApp={currentApp}
+        onPaymentSuccess={handlePaymentSuccess}
       />
 
       {/* Team Modal */}

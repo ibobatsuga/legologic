@@ -28,7 +28,7 @@ export function BillingModal({
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'bca' | 'mandiri' | 'bri'>('qris');
   const [countdown, setCountdown] = useState(899); // 14 mins 59 secs
   const [copiedVa, setCopiedVa] = useState(false);
-  const [invoiceId, setInvoiceId] = useState('LL-' + Math.floor(100000 + Math.random() * 900000));
+  const [invoiceId, setInvoiceId] = useState('LL-INV-892341');
 
   useEffect(() => {
     if (!isOpen) {
