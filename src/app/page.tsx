@@ -9,6 +9,8 @@ import { Sidebar } from '@/components/Sidebar';
 import { StudioView } from '@/components/StudioView';
 import { BillingModal } from '@/components/BillingModal';
 import { TeamModal } from '@/components/TeamModal';
+import { AuthModal } from '@/components/AuthModal';
+import { AuthUserProfile } from '@/lib/firebase';
 
 export default function Home() {
   const [apps, setApps] = useState<LegoApp[]>(ALL_TEMPLATES);
@@ -18,8 +20,9 @@ export default function Home() {
   
   const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [isTeamOpen, setIsTeamOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
-  const [user] = useState<User>({
+  const [user, setUser] = useState<User>({
     id: 'user-bobi',
     name: 'Om Bobi',
     email: 'bobi@legologic.id',
@@ -153,6 +156,28 @@ export default function Home() {
     });
   };
 
+  const handleAuthSuccess = (profile: AuthUserProfile) => {
+    const updatedUser: User = {
+      id: profile.id,
+      name: profile.name,
+      email: profile.email,
+      avatar: profile.avatar,
+      role: 'OWNER',
+    };
+    setUser(updatedUser);
+    try {
+      localStorage.setItem('legologic_user_v1', JSON.stringify(updatedUser));
+    } catch (e) {}
+
+    handleAddAuditLog({
+      userId: updatedUser.id,
+      userName: updatedUser.name,
+      action: profile.provider === 'google' ? 'Login via Akun Google' : 'Login Akun Email',
+      details: `Berhasil masuk dengan email: ${profile.email}`,
+      type: 'team',
+    });
+  };
+
   const currentApp = apps.find(a => a.id === currentAppId) || apps[0] || SATU_PIPELINE_APP;
 
   return (
@@ -173,6 +198,7 @@ export default function Home() {
         }}
         onOpenBilling={() => setIsBillingOpen(true)}
         onOpenTeam={() => setIsTeamOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
         user={user}
         organization={organization}
         wallet={wallet}
@@ -194,6 +220,13 @@ export default function Home() {
         onOpenBilling={() => setIsBillingOpen(true)}
         isHomeState={isHomeState}
         onExitHomeState={() => setIsHomeState(false)}
+      />
+
+      {/* Auth Modal (Firebase Google Sign In + Email) */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onAuthSuccess={handleAuthSuccess}
       />
 
       {/* Billing Modal */}
