@@ -4,9 +4,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Send, Sparkles, Plus, Paperclip, Wand2, ArrowUp, 
   ExternalLink, ArrowRight, Layers, Bot, User as UserIcon,
-  CheckCircle2, Clock, Terminal, Rocket
+  CheckCircle2, Clock, Terminal, Rocket, FileText, HelpCircle,
+  ListChecks, ChevronRight
 } from 'lucide-react';
-import { LegoApp, CreditWallet, User } from '@/types/legologic';
+import { LegoApp, CreditWallet, User, PRDDocument } from '@/types/legologic';
+import { analyzePromptCompleteness, generateFullPRD, convertPRDToLegoApp } from '@/lib/prd-engine';
+import { PRDViewerCard } from '@/components/PRDViewerCard';
 
 function FigmaIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   return (
@@ -33,6 +36,10 @@ interface ChatMessage {
   sender: 'user' | 'assistant';
   text: string;
   timestamp: string;
+  stage?: 'interview' | 'prd_review' | 'production';
+  interviewProgress?: number;
+  quickReplies?: string[];
+  prd?: PRDDocument;
   generatedApp?: LegoApp;
   thinkingTrace?: string;
 }
@@ -54,13 +61,21 @@ export function ChatView({
     {
       id: 'm1',
       sender: 'assistant',
-      text: 'Halo Om Bobi! Saya asisten GENESIS AI. Ceritakan aplikasi apa yang ingin Anda buat hari ini? Anda bisa meminta aplikasi CRM, sistem kasir, booking antrean, ataupun portal klien interaktif.',
+      text: 'Halo Om Bobi! Saya asisten GENESIS AI. Untuk memastikan aplikasi yang kita bangun tepat guna dan tidak meleset dari kebutuhan bisnis Anda, kita akan melalui 3 alur kerja terstruktur:\n\n1. **Wawancara Pengguna** (menggali persona, tujuan, dan aturan bisnis)\n2. **Penyusunan PRD Resmi** (10 poin spesifikasi teknis lengkap)\n3. **Masuk ke Produksi** (generate aplikasi live di Studio)\n\nSilakan ceritakan ide aplikasi yang ingin Anda buat hari ini.',
       timestamp: '10:00',
+      quickReplies: [
+        'Aplikasi Kasir & Order POS Kedai Kopi',
+        'Sistem Booking Jadwal & Rekam Medis Klinik Gigi',
+        'Pipeline CRM & Tracking Follow-up WhatsApp Sales',
+        'Kasir Laundry Kiloan & Notifikasi Siap Ambil'
+      ]
     }
   ]);
   const [promptInput, setPromptInput] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState('');
+  const [currentStage, setCurrentStage] = useState<'interview' | 'prd_review' | 'production'>('interview');
+  const [accumulatedNotes, setAccumulatedNotes] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -71,6 +86,9 @@ export function ChatView({
     scrollToBottom();
   }, [messages, isGenerating]);
 
+  /**
+   * Main handler when user submits prompt or clicks quick-reply
+   */
   const handleSendMessage = async (customPrompt?: string) => {
     const text = (customPrompt || promptInput).trim();
     if (!text || isGenerating) return;
@@ -91,44 +109,68 @@ export function ChatView({
     setMessages(prev => [...prev, userMsg]);
     setPromptInput('');
     setIsGenerating(true);
-    setGenerationStep('GENESIS AI sedang menganalisis kebutuhan...');
+
+    const updatedNotes = [...accumulatedNotes, text];
+    setAccumulatedNotes(updatedNotes);
 
     try {
-      setTimeout(() => setGenerationStep('Menganalisis kebutuhan & skema database...'), 1200);
-      setTimeout(() => setGenerationStep('Menyusun arsitektur komponen & UI interaktif...'), 2400);
+      setGenerationStep('GENESIS AI menganalisis kelengkapan 10 kriteria PRD...');
+      await new Promise(r => setTimeout(r, 800));
 
-      const res = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: text,
-          mode: 'build',
-          wallet,
-        }),
-      });
+      // Analyze completeness
+      const completeness = analyzePromptCompleteness(text, messages);
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal generate aplikasi');
+      if (!completeness.isComplete && currentStage !== 'prd_review') {
+        // TAHAP 1: WAWANCARA PENGGUNA
+        setGenerationStep('Menyusun pertanyaan wawancara kebutuhan produk...');
+        await new Promise(r => setTimeout(r, 700));
+
+        let interviewText = `Terima kasih! Ide aplikasi **${completeness.suggestedTitle}** (${completeness.domain}) sangat menarik.\n\nUntuk menyusun spesifikasi teknis yang matang sebelum masuk produksi, mohon lengkapi beberapa poin wawancara berikut:`;
+
+        completeness.interviewQuestions.forEach((q, idx) => {
+          interviewText += `\n\n**${idx + 1}.** ${q}`;
+        });
+
+        interviewText += `\n\n_Anda dapat menjawab pertanyaan di atas langsung di prompt chat, atau pilih tombol cepat di bawah ini jika data dirasa sudah cukup untuk lanjut ke PRD._`;
+
+        const interviewMsg: ChatMessage = {
+          id: 'msg-' + (Date.now() + 1),
+          sender: 'assistant',
+          text: interviewText,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          stage: 'interview',
+          interviewProgress: completeness.score,
+          quickReplies: completeness.quickReplies,
+          thinkingTrace: `Wawancara aktif: Kelengkapan data ${completeness.score}% · Menunggu konfirmasi persona & aturan bisnis.`
+        };
+
+        setCurrentStage('interview');
+        setMessages(prev => [...prev, interviewMsg]);
+      } else {
+        // TAHAP 2: MEMBUAT PRD RESMI (10 POIN LENGKAP)
+        setGenerationStep('Menyusun Dokumen PRD Resmi (10 Poin Spesifikasi)...');
+        await new Promise(r => setTimeout(r, 1200));
+
+        const prd = generateFullPRD(text, updatedNotes, `${user.name} (Product Owner)`);
+
+        const prdMsg: ChatMessage = {
+          id: 'msg-' + (Date.now() + 1),
+          sender: 'assistant',
+          text: `Data kebutuhan telah lengkap! Saya telah menyusun **Product Requirements Document (PRD)** resmi mencakup seluruh 10 poin arsitektur:\n\n1. Metadata Dokumen\n2. Latar Belakang & Tujuan Bisnis\n3. Profil Pengguna & Aturan Bisnis\n4. Lingkup Kerja (In-Scope vs Out-of-Scope)\n5. User Stories & Tabel Kebutuhan Fitur (Metode MoSCoW & Acceptance Criteria)\n6. Desain & UX Flow\n7. Kebutuhan Non-Fungsional (Performa & Regulasi PDP)\n8. Metrik Keberhasilan (KPI)\n9. Rencana Rilis & Kriteria Peluncuran\n10. Pertanyaan Terbuka & Mitigasi Risiko\n\nSilakan periksa dokumen di bawah ini. Jika sudah sesuai, tekan tombol **"Setujui PRD & Masuk ke Produksi"** untuk langsung men-generate aplikasinya di Studio.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          stage: 'prd_review',
+          prd,
+          thinkingTrace: `PRD generated: ${prd.metadata.productName} · Status Approved for Production · 10 poin terisi penuh.`
+        };
+
+        setCurrentStage('prd_review');
+        setMessages(prev => [...prev, prdMsg]);
       }
-
-      const generatedApp = data.app as LegoApp;
-
-      const aiMsg: ChatMessage = {
-        id: 'msg-' + (Date.now() + 1),
-        sender: 'assistant',
-        text: `Aplikasi **${generatedApp.name}** berhasil dirancang! Saya telah menyusun skema database, antarmuka visual yang responsif, serta metrik performa utama. Silakan buka di Studio untuk melihat preview live dan mengedit kodenya.`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        generatedApp,
-        thinkingTrace: data.thinkingTrace || 'Arsitektur komponen dan visual pipeline telah disesuaikan.',
-      };
-
-      setMessages(prev => [...prev, aiMsg]);
     } catch (err: any) {
       const errorMsg: ChatMessage = {
         id: 'msg-err-' + Date.now(),
         sender: 'assistant',
-        text: `Maaf, terjadi kendala saat memproses: ${err.message}. Silakan coba ulangi prompt Anda.`,
+        text: `Maaf, terjadi kendala saat memproses: ${err.message}. Silakan coba ulangi jawaban Anda.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -138,24 +180,82 @@ export function ChatView({
     }
   };
 
+  /**
+   * Handler when user approves PRD and requests production build
+   */
+  const handleApproveAndProduce = async (prd: PRDDocument) => {
+    setIsGenerating(true);
+    setGenerationStep('PRD Disetujui! Membangun arsitektur skema database...');
+
+    try {
+      await new Promise(r => setTimeout(r, 900));
+      setGenerationStep('Menyusun komponen UI, filter Rupiah, dan Kanban Pipeline...');
+      await new Promise(r => setTimeout(r, 1100));
+
+      const producedApp = convertPRDToLegoApp(prd, user.id, 'org-1');
+
+      const prodMsg: ChatMessage = {
+        id: 'msg-' + (Date.now() + 1),
+        sender: 'assistant',
+        text: `🚀 **Produksi Berhasil!** Aplikasi **${producedApp.name}** telah selesai dibangun sesuai spesifikasi PRD resmi.\n\n- Skema Database: **${producedApp.versions[0].tables[0].name}** (${producedApp.versions[0].tables[0].columns.length} Kolom, format Rupiah Rp)\n- KPI Metrik: **${producedApp.versions[0].metrics.map(m => m.label).join(', ')}**\n- Alur Status: **${producedApp.versions[0].kanban?.stages.map(s => s.name).join(' ➔ ') || 'Tabel Interaktif'}**\n\nPRD resmi telah dilampirkan ke dalam project ini. Silakan buka aplikasi di Studio untuk melihat preview interaktif live dan mengedit kodenya.`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        stage: 'production',
+        generatedApp: producedApp,
+        thinkingTrace: `Aplikasi diproduksi dari PRD ${prd.metadata.productName} · Versi v1 siap di Studio.`
+      };
+
+      setCurrentStage('production');
+      setMessages(prev => [...prev, prodMsg]);
+    } catch (err: any) {
+      alert('Gagal masuk ke produksi: ' + err.message);
+    } finally {
+      setIsGenerating(false);
+      setGenerationStep('');
+    }
+  };
+
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#fafafa] dot-grid">
       {/* Top Header */}
-      <header className="p-4 px-6 border-b border-slate-200/70 bg-white/80 backdrop-blur-xs flex items-center justify-between shrink-0 shadow-2xs">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-slate-900 tracking-tight">AI Chat Assistant</span>
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-            Menu 1
-          </span>
+      <header className="p-4 px-6 border-b border-slate-200/70 bg-white/80 backdrop-blur-xs flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-900 tracking-tight">AI Chat Assistant</span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                Menu 1
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Alur Otomasi: Wawancara Pengguna ➔ PRD Resmi (10 Poin) ➔ Masuk ke Produksi
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>GENESIS AI Engine</span>
+
+        {/* Lifecycle Phase Indicator Pill */}
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold bg-slate-100 p-1 rounded-xl border border-slate-200/80">
+          <span className={`px-2 py-0.5 rounded-lg transition-colors ${
+            currentStage === 'interview' ? 'bg-blue-600 text-white shadow-2xs' : 'text-slate-500'
+          }`}>
+            1. Wawancara
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <span className={`px-2 py-0.5 rounded-lg transition-colors ${
+            currentStage === 'prd_review' ? 'bg-indigo-600 text-white shadow-2xs' : 'text-slate-500'
+          }`}>
+            2. PRD Dokumen
+          </span>
+          <ChevronRight className="w-3 h-3 text-slate-400" />
+          <span className={`px-2 py-0.5 rounded-lg transition-colors ${
+            currentStage === 'production' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-500'
+          }`}>
+            3. Produksi
+          </span>
         </div>
       </header>
 
       {/* Chat Messages Feed */}
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-5 max-w-4xl mx-auto w-full">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 max-w-4xl mx-auto w-full">
         {messages.map(msg => (
           <div 
             key={msg.id}
@@ -167,7 +267,8 @@ export function ChatView({
               </div>
             )}
 
-            <div className={`space-y-3 max-w-[85%] sm:max-w-[75%]`}>
+            <div className={`space-y-3.5 max-w-[92%] sm:max-w-[85%]`}>
+              {/* Message text bubble */}
               <div 
                 className={`p-4 rounded-2xl text-xs leading-relaxed ${
                   msg.sender === 'user' 
@@ -175,28 +276,87 @@ export function ChatView({
                     : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-xs shadow-2xs'
                 }`}
               >
+                {/* Stage progress pill if present */}
+                {msg.stage === 'interview' && msg.interviewProgress && (
+                  <div className="mb-2 pb-2 border-b border-slate-100 flex items-center justify-between text-[11px]">
+                    <span className="font-bold text-blue-700 flex items-center gap-1">
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>Tahap 1: Wawancara Pengguna</span>
+                    </span>
+                    <span className="px-2 py-0.2 rounded-full bg-blue-50 text-blue-800 border border-blue-200 font-bold">
+                      Kelengkapan: {msg.interviewProgress}%
+                    </span>
+                  </div>
+                )}
+
                 <p className="whitespace-pre-wrap">{msg.text}</p>
-                <span className={`text-[10px] mt-1.5 block text-right ${msg.sender === 'user' ? 'text-slate-400' : 'text-slate-400'}`}>
+                <span className={`text-[10px] mt-2 block text-right ${msg.sender === 'user' ? 'text-slate-400' : 'text-slate-400'}`}>
                   {msg.timestamp}
                 </span>
               </div>
 
-              {/* Render Action Card if AI generated an App */}
+              {/* Quick Reply Chips during Interview Stage */}
+              {msg.quickReplies && msg.quickReplies.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                    Pilihan Jawaban / Aksi Cepat:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {msg.quickReplies.map((reply, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendMessage(reply)}
+                        disabled={isGenerating}
+                        className="text-[11px] text-left px-3 py-1.5 bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 text-slate-700 font-medium rounded-xl border border-slate-200 shadow-2xs transition-colors flex items-center gap-1.5 active:scale-98"
+                      >
+                        <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
+                        <span>{reply}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Render Full 10-Point PRD Card if AI generated a PRD */}
+              {msg.prd && (
+                <PRDViewerCard
+                  prd={msg.prd}
+                  onApproveAndProduce={handleApproveAndProduce}
+                  isProducing={isGenerating}
+                />
+              )}
+
+              {/* Render Action Card if AI produced an App */}
               {msg.generatedApp && (
-                <div className="bg-white rounded-2xl border border-blue-200 p-4 shadow-sm space-y-3">
+                <div className="bg-white rounded-2xl border-2 border-emerald-500/40 p-5 shadow-sm space-y-4">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                          App Siap Diedit
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          App Siap di Studio
                         </span>
-                        <h4 className="text-sm font-bold text-slate-900">
+                        <h4 className="text-base font-bold text-slate-900">
                           {msg.generatedApp.name}
                         </h4>
                       </div>
                       <p className="text-xs text-slate-500 mt-1">
                         {msg.generatedApp.description}
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                      <span className="text-[10px] text-slate-500 block">Tabel Database:</span>
+                      <strong className="text-slate-800">{msg.generatedApp.versions[0].tables[0].name}</strong>
+                    </div>
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/70">
+                      <span className="text-[10px] text-slate-500 block">Format Nominal:</span>
+                      <strong className="text-emerald-700 font-semibold">Rupiah (Rp)</strong>
+                    </div>
+                    <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200/70 col-span-2 sm:col-span-1">
+                      <span className="text-[10px] text-slate-500 block">Status Acuan:</span>
+                      <strong className="text-blue-700 font-semibold">PRD v1.0 Resmi</strong>
                     </div>
                   </div>
 
@@ -210,9 +370,10 @@ export function ChatView({
                   <div className="pt-1 flex items-center gap-2">
                     <button
                       onClick={() => onOpenInStudio(msg.generatedApp!)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 active:scale-98"
+                      className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-2 active:scale-95"
                     >
-                      <span>Buka di Studio (Menu 2)</span>
+                      <Rocket className="w-4 h-4" />
+                      <span>Buka di Studio & Jalankan Preview</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -236,7 +397,7 @@ export function ChatView({
             <div className="bg-white border border-blue-200 rounded-2xl rounded-tl-xs p-4 shadow-2xs space-y-1.5 max-w-sm">
               <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
-                <span>GENESIS AI sedang berpikir</span>
+                <span>GENESIS AI sedang menganalisis</span>
               </div>
               <p className="text-[11px] text-blue-700">{generationStep}</p>
             </div>
@@ -259,7 +420,7 @@ export function ChatView({
                 handleSendMessage();
               }
             }}
-            placeholder="Tulis ide aplikasi Anda di sini... (Contoh: Buatkan aplikasi CRM WhatsApp dengan pipeline deal visual)"
+            placeholder="Ketik ide aplikasi atau jawab pertanyaan wawancara di sini... (Contoh: Kasir kedai kopi dengan metode bayar QRIS & Tunai, cetak struk via WhatsApp)"
             className="w-full text-xs bg-transparent border-0 focus:outline-none resize-none text-slate-900 placeholder:text-slate-400 font-normal leading-relaxed"
           />
 
@@ -281,11 +442,11 @@ export function ChatView({
               </button>
               <button 
                 type="button"
-                onClick={() => setPromptInput('Buatkan aplikasi CRM B2B untuk UMKM dengan pipeline stages deals, kontak WhatsApp, estimasi nilai transaksi dalam Rupiah, dan verifikasi izin outreach.')}
+                onClick={() => setPromptInput('Aplikasi Kasir POS Kedai Kopi. Persona: Kasir & Barista. In-Scope: order menu, bayar QRIS/Tunai, nota WhatsApp. Out-of-Scope: integrasi ojol. Aturan: stok cup otomatis.')}
                 className="px-2 py-0.5 text-[10px] text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-md flex items-center gap-1 border border-slate-200"
               >
                 <Wand2 className="w-3 h-3 text-amber-500" />
-                <span>Improve prompt</span>
+                <span>Format Lengkap</span>
               </button>
             </div>
 
@@ -313,10 +474,10 @@ export function ChatView({
         {/* Quick Suggestion Pills */}
         <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2.5">
           {[
-            { label: '💬 CRM WhatsApp', prompt: 'Buatkan aplikasi CRM WhatsApp dengan tracking leads dan pipeline visual.' },
-            { label: '📦 Kasir & Inventori', prompt: 'Buatkan aplikasi manajemen inventori stok barang dan kasir toko retail.' },
-            { label: '🗓️ Booking Antrean', prompt: 'Buatkan sistem reservasi booking jadwal dan nomor antrean pasien.' },
-            { label: '📑 Invoice & Portal', prompt: 'Buatkan portal invoice klien dengan status pembayaran dan approval.' },
+            { label: '☕ Kasir Kedai Kopi', prompt: 'Saya mau buat aplikasi kasir kedai kopi dengan pencatatan order, bayar QRIS & Tunai, dan nota WhatsApp.' },
+            { label: '🏥 Booking Klinik Gigi', prompt: 'Buatkan sistem pendaftaran antrean pasien klinik gigi, jadwal dokter, dan rekam medis tindakan.' },
+            { label: '💬 CRM Pipeline Sales', prompt: 'Buatkan aplikasi CRM WhatsApp dengan tracking leads dan kanban pipeline deals.' },
+            { label: '🧺 Kasir Laundry', prompt: 'Buatkan aplikasi kasir laundry kiloan dengan nomor rak nota dan status WhatsApp siap ambil.' },
           ].map(item => (
             <button
               key={item.label}

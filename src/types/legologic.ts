@@ -91,6 +91,96 @@ export interface AppVersion {
   tagline: string;
 }
 
+export interface PRDMetadata {
+  productName: string;
+  status: 'Draft' | 'In Review' | 'Approved' | 'In Development' | 'Launched';
+  author: string;
+  coreTeam: {
+    uxUiDesigner: string;
+    techLead: string;
+    qaEngineer: string;
+  };
+  lastUpdated: string;
+  changelog: string;
+}
+
+export interface PRDBackgroundObjectives {
+  background: string;
+  problemStatement: string;
+  businessGoal: string;
+}
+
+export interface PRDUserPersonaBusinessLogic {
+  userPersona: string;
+  assumptions: string[];
+  businessRules: string[];
+}
+
+export interface PRDScope {
+  inScope: string[];
+  outOfScope: string[];
+}
+
+export interface PRDFunctionalFeature {
+  id: string; // FR-01, FR-02, ...
+  description: string;
+  priority: 'Must Have' | 'Should Have' | 'Could Have' | "Won't Have";
+  acceptanceCriteria: string; // Given ... When ... Then ...
+}
+
+export interface PRDFunctionalRequirements {
+  userStories: string[]; // As a [user], I want [goal] so that [reason]
+  features: PRDFunctionalFeature[];
+}
+
+export interface PRDUxUiRequirements {
+  userFlow: string[];
+  designLinksNotes: string;
+  elementDetails: {
+    errorMessaging: string;
+    actionCopywriting: string;
+    emptyStates: string;
+  };
+}
+
+export interface PRDNonFunctionalRequirements {
+  performance: string;
+  security: string;
+  scalabilityAccessibility: string;
+}
+
+export interface PRDSuccessMetrics {
+  primaryMetric: string;
+  secondaryMetric: string;
+}
+
+export interface PRDReleasePlan {
+  testingPlan: string;
+  launchCriteria: string;
+}
+
+export interface PRDOpenQuestionsRisks {
+  openQuestions: string[];
+  risksAndMitigations: {
+    risk: string;
+    mitigation: string;
+  }[];
+}
+
+export interface PRDDocument {
+  id: string;
+  metadata: PRDMetadata;
+  backgroundObjectives: PRDBackgroundObjectives;
+  userPersonaBusinessLogic: PRDUserPersonaBusinessLogic;
+  scope: PRDScope;
+  functionalRequirements: PRDFunctionalRequirements;
+  uxUiRequirements: PRDUxUiRequirements;
+  nonFunctionalRequirements: PRDNonFunctionalRequirements;
+  successMetrics: PRDSuccessMetrics;
+  releasePlan: PRDReleasePlan;
+  openQuestionsRisks: PRDOpenQuestionsRisks;
+}
+
 export interface LegoApp {
   id: string;
   slug: string;
@@ -107,6 +197,7 @@ export interface LegoApp {
   organizationId: string;
   createdById: string;
   plan?: AppPlan;
+  prd?: PRDDocument;
 }
 
 export interface ChatMessage {
