@@ -72,7 +72,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
             <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center p-0.5 shadow-2xs">
               <Image 
                 src="/legologic-logo.webp" 
-                alt="LegoLogic Logo" 
+                alt="GENESIS Logo" 
                 width={32} 
                 height={32}
                 className="object-contain"
@@ -81,14 +81,14 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess }: AuthModalProps) {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-sm tracking-tight text-slate-900">
-                  Lego<span className="text-blue-600">Logic</span>
+                  GENESIS<span className="text-blue-600">.</span>
                 </span>
                 <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-sm bg-blue-100 text-blue-800">
                   AUTH
                 </span>
               </div>
               <p className="text-[10px] text-slate-400">
-                {authMode === 'login' ? 'Masuk ke akun Anda' : 'Buat akun LegoLogic baru'}
+                {authMode === 'login' ? 'Masuk ke akun Anda' : 'Buat akun GENESIS baru'}
               </p>
             </div>
           </div>

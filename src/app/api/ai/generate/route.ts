@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('API /api/ai/generate error:', error);
     return NextResponse.json(
-      { error: error?.message || 'Terjadi kesalahan saat memproses permintaan ke Sakelar AI.' },
+      { error: error?.message || 'Terjadi kesalahan saat memproses permintaan ke GENESIS AI.' },
       { status: 500 }
     );
   }

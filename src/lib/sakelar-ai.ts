@@ -23,7 +23,7 @@ export interface SakelarGenerateResponse {
 }
 
 const SYSTEM_PROMPT_BUILDER = `
-Anda adalah LegoLogic AI Engine — arsitek aplikasi bisnis handal berbasis model claude-sonnet-4.6 dari Sakelar AI.
+Anda adalah GENESIS AI Engine — arsitek aplikasi bisnis handal kelas enterprise.
 Tugas Anda adalah merancang dan menyusun web application bisnis siap-pakai untuk pemilik usaha non-teknis di Indonesia.
 
 PRINSIP DESAIN:
@@ -187,7 +187,7 @@ Kategori: ${req.category || 'Bisnis'}`;
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Sakelar AI API error (${response.status}): ${errorText}`);
+    throw new Error(`AI Engine error (${response.status}): ${errorText}`);
   }
 
   const jsonResult = await response.json();

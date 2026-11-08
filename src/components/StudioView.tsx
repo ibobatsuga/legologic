@@ -125,7 +125,7 @@ export function StudioView({
     }
 
     setIsGenerating(true);
-    setGenerationStep('Menghubungi Claude Sonnet 4.6 via Sakelar AI...');
+    setGenerationStep('GENESIS AI sedang memproses...');
 
     try {
       if (isCleanBlank) {
@@ -248,7 +248,7 @@ export function StudioView({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">claude-sonnet-4.6</span>
+            <span className="text-[10px] font-medium text-slate-400 hidden sm:inline">GENESIS AI Engine</span>
           </div>
         </div>
 
@@ -263,7 +263,7 @@ export function StudioView({
               <div className="flex items-center gap-2 font-medium text-[11px]">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                 <span>
-                  {isCleanBlank ? 'Status: Siap Menerima Instruksi' : 'Thinking trace (Sakelar AI)'}
+                  {isCleanBlank ? 'Status: Siap Menerima Instruksi' : 'Thinking trace (GENESIS AI)'}
                 </span>
               </div>
               {isThinkingOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -349,7 +349,7 @@ export function StudioView({
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-900 space-y-1.5 animate-pulse">
               <div className="flex items-center gap-2 font-bold">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
-                <span>Claude Sonnet 4.6 sedang memproses</span>
+                <span>GENESIS AI sedang memproses</span>
               </div>
               <p className="text-[11px] text-blue-700">{generationStep}</p>
             </div>

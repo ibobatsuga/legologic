@@ -51,18 +51,18 @@ export function Sidebar({
           <div className="relative w-7 h-7 rounded-lg overflow-hidden border border-slate-200 bg-white flex items-center justify-center p-0.5 shadow-2xs">
             <Image 
               src="/legologic-logo.webp" 
-              alt="LegoLogic Logo" 
+              alt="GENESIS Logo" 
               width={28} 
               height={28}
               className="object-contain"
             />
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-sm tracking-tight text-slate-900">
-              Lego<span className="text-blue-600">Logic</span>
+            <span className="font-black text-sm tracking-widest text-slate-900 uppercase">
+              GENE<span className="text-blue-600">SIS</span>
             </span>
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded-sm bg-slate-100 text-slate-600 border border-slate-200">
-              v0.1
+              v1.0
             </span>
           </div>
         </div>

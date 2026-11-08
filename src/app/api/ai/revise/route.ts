@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('API /api/ai/revise error:', error);
     return NextResponse.json(
-      { error: error?.message || 'Terjadi kesalahan saat memproses revisi dengan Sakelar AI.' },
+      { error: error?.message || 'Terjadi kesalahan saat memproses revisi dengan GENESIS AI.' },
       { status: 500 }
     );
   }

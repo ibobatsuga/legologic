@@ -12,7 +12,7 @@ export function ConnectorsView() {
       status: 'Aktif & Terhubung',
       icon: MessageCircle,
       iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-      badge: 'Bawaan LegoLogic',
+      badge: 'Bawaan GENESIS',
     },
     {
       id: 'qris',

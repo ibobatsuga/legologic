@@ -34,7 +34,7 @@ export default function Home() {
   const [user, setUser] = useState<User>({
     id: 'user-bobi',
     name: 'Om Bobi',
-    email: 'bobi@legologic.id',
+    email: 'bobi@genesis.id',
     role: 'OWNER',
   });
 
@@ -58,7 +58,7 @@ export default function Home() {
   });
 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([
-    { id: 'tm-1', name: 'Om Bobi', email: 'bobi@legologic.id', role: 'OWNER', status: 'active', joinedAt: '2026-11-01' },
+    { id: 'tm-1', name: 'Om Bobi', email: 'bobi@genesis.id', role: 'OWNER', status: 'active', joinedAt: '2026-11-01' },
     { id: 'tm-2', name: 'Ahmad Sales', email: 'ahmad@nalarasa.com', role: 'MEMBER', status: 'active', joinedAt: '2026-11-03' },
     { id: 'tm-3', name: 'Dian Designer', email: 'dian@nalarasa.com', role: 'MEMBER', status: 'active', joinedAt: '2026-11-05' },
   ]);
@@ -70,7 +70,7 @@ export default function Home() {
       userId: 'user-bobi',
       userName: 'Om Bobi',
       action: 'Project Baru Siap',
-      details: 'Studio LegoLogic kanvas bersih siap menerima instruksi.',
+      details: 'Studio GENESIS kanvas bersih siap menerima instruksi.',
       type: 'build',
     },
     {
@@ -79,7 +79,7 @@ export default function Home() {
       userId: 'user-bobi',
       userName: 'Om Bobi',
       action: 'Inisialisasi Model AI',
-      details: 'Terkoneksi ke gateway Sakelar AI dengan model claude-sonnet-4.6.',
+      details: 'Terkoneksi ke GENESIS AI Engine terverifikasi.',
       type: 'build',
     }
   ]);
@@ -269,7 +269,7 @@ export default function Home() {
 
       {/* Main View Area depending on active menu */}
       {currentNavTab === 'chat' ? (
-        /* MENU 1: Chat Assistant with Claude Sonnet 4.6 */
+        /* MENU 1: Chat Assistant with GENESIS AI */
         <ChatView
           wallet={wallet}
           user={user}

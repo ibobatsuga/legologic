@@ -29,7 +29,7 @@ export function SettingsView({
             <span>Pengaturan Akun & Workspace</span>
           </h1>
           <p className="text-xs text-slate-500">
-            Kelola profil pengguna, organisasi tim, domain publik, dan preferensi LegoLogic.
+            Kelola profil pengguna, organisasi tim, domain publik, dan preferensi GENESIS.
           </p>
         </div>
       </header>
@@ -108,25 +108,25 @@ export function SettingsView({
           <div className="flex items-center gap-2.5">
             <Sparkles className="w-5 h-5 text-purple-600" />
             <div>
-              <h3 className="text-sm font-bold text-slate-900">AI Gateway Engine</h3>
-              <p className="text-xs text-slate-500">Sakelar AI Gateway · claude-sonnet-4.6</p>
+              <h3 className="text-sm font-bold text-slate-900">GENESIS AI Engine</h3>
+              <p className="text-xs text-slate-500">Arsitektur AI Terdedikasi · Otomasi Full-Stack</p>
             </div>
           </div>
 
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/60 text-xs text-slate-600 space-y-1">
             <div className="flex justify-between">
-              <span className="font-semibold">Gateway Endpoint:</span>
-              <span className="font-mono text-slate-500">https://api.sakelar.web.id/v1</span>
+              <span className="font-semibold">Engine Gateway:</span>
+              <span className="font-mono text-slate-500">https://api.genesis.internal/v1</span>
             </div>
             <div className="flex justify-between">
               <span className="font-semibold">Model Aktif:</span>
-              <span className="font-mono text-slate-500">claude-sonnet-4.6</span>
+              <span className="font-mono text-slate-500">GENESIS Ultra v2</span>
             </div>
             <div className="flex justify-between">
               <span className="font-semibold">Status Gateway:</span>
               <span className="text-emerald-700 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                Online & Terverifikasi
+                Online & Siap Pakai
               </span>
             </div>
           </div>

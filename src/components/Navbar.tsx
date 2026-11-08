@@ -40,7 +40,7 @@ export function Navbar({
           <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-slate-200 shadow-xs bg-white flex items-center justify-center p-0.5">
             <Image 
               src="/legologic-logo.webp" 
-              alt="LegoLogic Logo" 
+              alt="GENESIS Logo" 
               width={32} 
               height={32}
               className="object-contain"
@@ -48,11 +48,11 @@ export function Navbar({
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-base tracking-tight text-slate-900">
-                Lego<span className="text-blue-600">Logic</span>
+              <span className="font-black text-base tracking-widest text-slate-900 uppercase">
+                GENE<span className="text-blue-600">SIS</span>
               </span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-sm bg-amber-100 text-amber-800 border border-amber-200">
-                MVP
+              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-sm bg-blue-100 text-blue-800 border border-blue-200">
+                PRO
               </span>
             </div>
             <p className="text-[10px] text-slate-500 hidden sm:block">
@@ -64,8 +64,7 @@ export function Navbar({
         {/* AI Engine Model Badge */}
         <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-[11px] text-slate-700">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="font-semibold text-slate-900">claude-sonnet-4.6</span>
-          <span className="text-slate-400">· Sakelar AI</span>
+          <span className="font-semibold text-slate-900">GENESIS AI Engine</span>
         </div>
 
         {/* Active App Selector */}

@@ -51,7 +51,7 @@ export function BuilderView({
     {
       id: 'm-init',
       role: 'assistant',
-      content: `Halo! Saya LegoLogic Builder AI didukung model claude-sonnet-4.6 via Sakelar AI. Aplikasi "${app.name}" siap digunakan. Anda dapat mencoba interaksi di tab Preview, atau tulis revisi di sini.`,
+      content: `Halo! Saya GENESIS Builder AI. Aplikasi "${app.name}" siap digunakan. Anda dapat mencoba interaksi di tab Preview, atau tulis revisi di sini.`,
       timestamp: '10:00',
       versionCreated: app.currentVersion,
       suggestedPrompts: [
@@ -91,7 +91,7 @@ export function BuilderView({
     setChatMessages(prev => [...prev, newUserMsg]);
     setPromptText('');
     setIsGenerating(true);
-    setGenerationStep('Menghubungkan ke Claude Sonnet 4.6 via Sakelar AI...');
+    setGenerationStep('Menghubungkan ke GENESIS AI Engine...');
 
     try {
       setTimeout(() => setGenerationStep('Menganalisis kebutuhan & skema bisnis...'), 1000);
@@ -123,7 +123,7 @@ export function BuilderView({
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Gagal memproses dengan Claude Sonnet 4.6');
+        throw new Error(data.error || 'Gagal memproses dengan GENESIS AI');
       }
 
       const newVersion: AppVersion = data.version;
@@ -153,7 +153,7 @@ export function BuilderView({
         userId: user.id,
         userName: user.name,
         action: `Generate Versi v${newVersion.versionNumber}`,
-        details: `Prompt: "${textToSend.substring(0, 50)}..." [Model: claude-sonnet-4.6, -${aiCost} AI Credits]`,
+        details: `Prompt: "${textToSend.substring(0, 50)}..." [Engine: GENESIS AI, -${aiCost} AI Credits]`,
         type: 'build',
       });
 
@@ -236,7 +236,7 @@ export function BuilderView({
       userId: user.id,
       userName: user.name,
       action: 'Publish Web App',
-      details: `Dipublish ke subdomain: https://${publishedSlugClean}.legologic.id`,
+      details: `Dipublish ke subdomain: https://${publishedSlugClean}.genesis.id`,
       type: 'publish',
     });
   };
@@ -258,7 +258,7 @@ export function BuilderView({
 
   const publishedFullUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/p/${app.publishedSlug || app.slug}`
-    : `https://${app.publishedSlug || app.slug}.legologic.id`;
+    : `https://${app.publishedSlug || app.slug}.genesis.id`;
 
   return (
     <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-53px)] overflow-hidden bg-slate-100">
@@ -317,7 +317,7 @@ export function BuilderView({
                 {msg.role === 'assistant' && (
                   <div className="flex items-center gap-1.5 font-bold text-[11px] mb-1.5 text-blue-700">
                     <Sparkles className="w-3.5 h-3.5" />
-                    <span>LegoLogic AI (claude-sonnet-4.6)</span>
+                    <span>GENESIS AI</span>
                   </div>
                 )}
 
@@ -359,7 +359,7 @@ export function BuilderView({
             <div className="p-3.5 bg-blue-50 border border-blue-200 rounded-2xl text-xs text-blue-900 space-y-2 animate-pulse">
               <div className="flex items-center gap-2 font-bold">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-ping" />
-                <span>Memproses dengan Claude Sonnet 4.6</span>
+                <span>Memproses dengan GENESIS AI</span>
               </div>
               <p className="text-[11px] text-blue-700">{generationStep}</p>
             </div>
@@ -371,7 +371,7 @@ export function BuilderView({
           {/* Credit Estimation pill */}
           <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
             <span>Estimasi: {app.versions.length > 0 ? '2' : '5'} Kredit AI</span>
-            <span className="text-slate-400">Model: claude-sonnet-4.6 (Sakelar)</span>
+            <span className="text-slate-400">Engine: GENESIS AI Engine</span>
           </div>
 
           <div className="relative flex items-end gap-1.5 bg-slate-50 border border-slate-200 rounded-2xl p-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:bg-white transition-all">
@@ -402,7 +402,7 @@ export function BuilderView({
                   ? 'bg-blue-600 hover:bg-blue-700'
                   : 'bg-slate-300 cursor-not-allowed'
               }`}
-              title="Kirim instruksi ke Claude Sonnet 4.6"
+              title="Kirim instruksi ke GENESIS AI"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -551,7 +551,7 @@ export function BuilderView({
                   <div>
                     <h3 className="text-base font-bold text-slate-900">Database Aplikasi Terisolasi</h3>
                     <p className="text-xs text-slate-500">
-                      Tiap aplikasi LegoLogic memiliki tabel terpisah yang aman dari akses organisasi lain.
+                      Tiap aplikasi GENESIS memiliki tabel terpisah yang aman dari akses organisasi lain.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -686,7 +686,7 @@ export function BuilderView({
                   <Rocket className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Publikasi Subdomain LegoLogic</h3>
+                  <h3 className="text-base font-bold text-slate-900">Publikasi Subdomain GENESIS</h3>
                   <p className="text-xs text-slate-500">
                     Aplikasi Anda akan langsung online dan bisa diakses oleh pelanggan atau tim kerja.
                   </p>
@@ -708,7 +708,7 @@ export function BuilderView({
                     className="flex-1 p-2 text-xs border border-slate-300 bg-white font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="px-3 py-2 text-xs bg-slate-100 border border-l-0 border-slate-300 rounded-r-xl text-slate-500 font-mono">
-                    .legologic.id
+                    .genesis.id
                   </span>
                 </div>
               </div>

@@ -458,14 +458,14 @@ export function BillingModal({
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                         <Cloud className="w-4 h-4 text-blue-600" />
-                        <span>Cloud LegoLogic</span>
+                        <span>Cloud GENESIS</span>
                       </span>
                       <span className="text-[9px] font-bold px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded">
                         Rp 49k / bln
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-relaxed">
-                      Langsung live di subdomain LegoLogic dengan database dan auto-SSL terkelola.
+                      Langsung live di subdomain GENESIS dengan database dan auto-SSL terkelola.
                     </p>
                   </div>
 

@@ -26,7 +26,7 @@ export function UsageView({ wallet, currentApp, onOpenBilling }: UsageViewProps)
             <span>Usage & Saldo Kredit</span>
           </h1>
           <p className="text-xs text-slate-500">
-            Pantau pemakaian Kredit AI (Claude Sonnet 4.6), hosting cloud, dan aktivasi paket aplikasi Anda.
+            Pantau pemakaian Kredit AI, hosting cloud, dan aktivasi paket aplikasi Anda.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export function UsageView({ wallet, currentApp, onOpenBilling }: UsageViewProps)
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Kredit AI Builder</h3>
-                  <p className="text-xs text-slate-500">Claude Sonnet 4.6 via Sakelar AI</p>
+                  <p className="text-xs text-slate-500">GENESIS AI Engine</p>
                 </div>
               </div>
               <span className="text-xs font-bold px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full border border-amber-200">
@@ -204,7 +204,7 @@ export function UsageView({ wallet, currentApp, onOpenBilling }: UsageViewProps)
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Unduh file source code lengkap (Next.js / TSX / Tailwind) beserta skema database. Anda bebas mengurus dan men-deploy sendiri di Vercel, Netlify, cPanel, atau VPS tanpa biaya langganan bulanan ke LegoLogic.
+                Unduh file source code lengkap (Next.js / TSX / Tailwind) beserta skema database. Anda bebas mengurus dan men-deploy sendiri di Vercel, Netlify, cPanel, atau VPS tanpa biaya langganan bulanan ke GENESIS.
               </p>
               <div className="text-[11px] text-slate-600 font-medium pt-1 border-t border-slate-200">
                 Cocok untuk: Developer atau tim yang sudah punya server sendiri.
@@ -215,14 +215,14 @@ export function UsageView({ wallet, currentApp, onOpenBilling }: UsageViewProps)
             <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
-                  <span>2. Managed Cloud LegoLogic</span>
+                  <span>2. Managed Cloud GENESIS</span>
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-full">
                   Rp 49.000 / bln
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Gunakan infrastruktur cloud LegoLogic. Aplikasi langsung live seketika di subdomain publik, lengkap dengan database cloud terkelola, sertifikat SSL HTTPS otomatis, dan maintenance zero-setup.
+                Gunakan infrastruktur cloud GENESIS. Aplikasi langsung live seketika di subdomain publik, lengkap dengan database cloud terkelola, sertifikat SSL HTTPS otomatis, dan maintenance zero-setup.
               </p>
               <div className="text-[11px] text-blue-900 font-medium pt-1 border-t border-blue-200">
                 Cocok untuk: Pemilik bisnis yang ingin langsung live tanpa repot teknis server.

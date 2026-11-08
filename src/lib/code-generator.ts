@@ -3,7 +3,7 @@ import { AppVersion } from '@/types/legologic';
 export function generateAppSourceCode(version?: AppVersion): string {
   if (!version || !version.tables || version.tables.length === 0) {
     return `// ——————————————————————————————————————————————————————————
-// LegoLogic Studio — Project Baru
+// GENESIS Studio — Project Baru
 // Kanvas Bersih: Belum ada kode yang dihasilkan.
 // ——————————————————————————————————————————————————————————
 //
@@ -26,8 +26,8 @@ export function generateAppSourceCode(version?: AppVersion): string {
   }).join('\n\n');
 
   return `// ——————————————————————————————————————————————————————————
-// LegoLogic AI Generated Application: ${version.appName}
-// Version: v${version.versionNumber} | Engine: claude-sonnet-4.6 (Sakelar AI)
+// GENESIS AI Generated Application: ${version.appName}
+// Version: v${version.versionNumber} | Engine: GENESIS AI Engine
 // ——————————————————————————————————————————————————————————
 
 import React, { useState } from 'react';

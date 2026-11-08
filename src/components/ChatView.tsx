@@ -54,7 +54,7 @@ export function ChatView({
     {
       id: 'm1',
       sender: 'assistant',
-      text: 'Halo Om Bobi! Saya asisten AI LegoLogic ditenagai Claude Sonnet 4.6. Ceritakan aplikasi apa yang ingin Anda buat hari ini? Anda bisa meminta aplikasi CRM, sistem kasir, booking antrean, ataupun portal klien interaktif.',
+      text: 'Halo Om Bobi! Saya asisten GENESIS AI. Ceritakan aplikasi apa yang ingin Anda buat hari ini? Anda bisa meminta aplikasi CRM, sistem kasir, booking antrean, ataupun portal klien interaktif.',
       timestamp: '10:00',
     }
   ]);
@@ -91,7 +91,7 @@ export function ChatView({
     setMessages(prev => [...prev, userMsg]);
     setPromptInput('');
     setIsGenerating(true);
-    setGenerationStep('Menghubungi Claude Sonnet 4.6 via Sakelar AI...');
+    setGenerationStep('GENESIS AI sedang menganalisis kebutuhan...');
 
     try {
       setTimeout(() => setGenerationStep('Menganalisis kebutuhan & skema database...'), 1200);
@@ -150,7 +150,7 @@ export function ChatView({
         </div>
         <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Sakelar AI · claude-sonnet-4.6</span>
+          <span>GENESIS AI Engine</span>
         </div>
       </header>
 
@@ -236,7 +236,7 @@ export function ChatView({
             <div className="bg-white border border-blue-200 rounded-2xl rounded-tl-xs p-4 shadow-2xs space-y-1.5 max-w-sm">
               <div className="flex items-center gap-2 text-xs font-bold text-blue-900">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
-                <span>Claude Sonnet 4.6 sedang berpikir</span>
+                <span>GENESIS AI sedang berpikir</span>
               </div>
               <p className="text-[11px] text-blue-700">{generationStep}</p>
             </div>

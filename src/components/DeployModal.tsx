@@ -51,8 +51,8 @@ export function DeployModal({
     URL.revokeObjectURL(url);
   };
 
-  // Handle deploying to LegoLogic Cloud
-  const handleDeployToLegoLogic = () => {
+  // Handle deploying to GENESIS Cloud
+  const handleDeployToGenesis = () => {
     setIsDeploying(true);
     setTimeout(() => {
       const updatedApp: LegoApp = {
@@ -145,7 +145,7 @@ export function DeployModal({
                     1. Unduh Source Code
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    Bawa pulang kode aplikasi dan urus hosting sendiri. Tidak ada biaya langganan bulanan ke LegoLogic.
+                    Bawa pulang kode aplikasi dan urus hosting sendiri. Tidak ada biaya langganan bulanan ke GENESIS.
                   </p>
                 </div>
 
@@ -166,11 +166,11 @@ export function DeployModal({
               </div>
 
               <div className="text-[11px] font-bold text-slate-700 pt-1">
-                Biaya Hosting LegoLogic: <span className="text-emerald-700">Rp 0 (Gratis)</span>
+                Biaya Hosting GENESIS: <span className="text-emerald-700">Rp 0 (Gratis)</span>
               </div>
             </div>
 
-            {/* OPTION 2: HOSTING CLOUD LEGOLOGIC */}
+            {/* OPTION 2: HOSTING CLOUD GENESIS */}
             <div
               onClick={() => setSelectedOption('cloud')}
               className={`rounded-2xl p-5 border-2 transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
@@ -191,10 +191,10 @@ export function DeployModal({
 
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">
-                    2. Layanan Cloud LegoLogic
+                    2. Layanan Cloud GENESIS
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                    LegoLogic mengurus seluruh infrastruktur hosting, database, dan SSL. Langsung live seketika.
+                    GENESIS mengurus seluruh infrastruktur hosting, database, dan SSL. Langsung live seketika.
                   </p>
                 </div>
 
@@ -282,16 +282,16 @@ export function DeployModal({
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                     <Cloud className="w-4 h-4 text-blue-600" />
-                    <span>Layanan Cloud Managed LegoLogic</span>
+                    <span>Layanan Cloud Managed GENESIS</span>
                   </h4>
                   <p className="text-[11px] text-slate-500">
-                    Aplikasi di-deploy dan dijalankan 24/7 di cloud server LegoLogic dengan database aktif.
+                    Aplikasi di-deploy dan dijalankan 24/7 di cloud server GENESIS dengan database aktif.
                   </p>
                 </div>
 
                 {!isCloudLive ? (
                   <button
-                    onClick={handleDeployToLegoLogic}
+                    onClick={handleDeployToGenesis}
                     disabled={isDeploying}
                     className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-colors"
                   >

@@ -23,8 +23,8 @@ export const APP_TIERS: Record<'MINIMAL' | 'STANDAR' | 'OPTIMAL', AppTierDetails
     maxRecords: 250,
     features: [
       '1 Aplikasi Web Bisnis Aktif',
-      '30 Kredit AI Build & Revisi (claude-sonnet-4.6)',
-      'Subdomain Instan .legologic.id',
+      '30 Kredit AI Build & Revisi (GENESIS AI)',
+      'Subdomain Instan .genesis.id',
       'Penyimpanan hingga 250 baris data',
       'Responsif Mobile, Tablet & Desktop'
     ]
