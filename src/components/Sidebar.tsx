@@ -37,9 +37,9 @@ export function Sidebar({
     { id: 'library', label: 'Library', icon: FolderGit2 },
     { id: 'database', label: 'Database', icon: Database },
     { id: 'history', label: 'History & Versi', icon: History },
-    { id: 'usage', label: 'Usage / Kredit', icon: Zap, badge: `${wallet.aiCredits} AI` },
     { id: 'connectors', label: 'Connectors', icon: Layers },
     { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'usage', label: 'Usage / Kredit', icon: Zap, badge: `${wallet.aiCredits} AI` },
   ];
 
   return (
@@ -85,13 +85,7 @@ export function Sidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => {
-                  if (item.id === 'usage') {
-                    onOpenBilling();
-                  } else {
-                    onSelectTab(item.id);
-                  }
-                }}
+                onClick={() => onSelectTab(item.id)}
                 className={`w-full px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center justify-between transition-colors ${
                   isActive
                     ? 'bg-slate-100 text-slate-900 font-semibold'

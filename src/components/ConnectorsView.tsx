@@ -1,22 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Layers, MessageCircle, QrCode, FileSpreadsheet, ShieldCheck, Check, Sparkles } from 'lucide-react';
-
-function GithubIcon({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-    </svg>
-  );
-}
+import { Layers, MessageCircle, QrCode, FileSpreadsheet, Webhook, Check, ArrowRight } from 'lucide-react';
 
 export function ConnectorsView() {
   const connectors = [
     {
       id: 'wa',
       name: 'WhatsApp Click-to-Chat & Direct Lead',
-      description: 'Menghubungkan tombol follow-up dan kontak pelanggan langsung ke WhatsApp tanpa biaya API.',
+      description: 'Menghubungkan tombol follow-up dan kontak pelanggan langsung ke WhatsApp pemilik bisnis tanpa biaya API.',
       status: 'Aktif & Terhubung',
       icon: MessageCircle,
       iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-100',
@@ -25,47 +17,29 @@ export function ConnectorsView() {
     {
       id: 'qris',
       name: 'Pembayaran QRIS & Virtual Account',
-      description: 'Menerima pembayaran instan via QRIS semua bank & e-wallet (BCA, Mandiri, BRI, BNI, GoPay, OVO).',
+      description: 'Menerima pembayaran instan pelanggan via QRIS semua bank & e-wallet (BCA, Mandiri, BRI, BNI, GoPay, OVO).',
       status: 'Siap Digunakan',
       icon: QrCode,
       iconColor: 'text-blue-600 bg-blue-50 border-blue-100',
-      badge: 'Indonesia Ready',
+      badge: 'Payment Gateway',
     },
     {
       id: 'sheets',
       name: 'Google Sheets & CSV Importer',
-      description: 'Ekspor dan impor data pelanggan, inventori barang, atau transaksi langsung ke spreadsheet.',
+      description: 'Ekspor dan impor data pelanggan, inventori stok barang, atau rekaman transaksi langsung ke spreadsheet.',
       status: 'Tersedia',
       icon: FileSpreadsheet,
       iconColor: 'text-amber-600 bg-amber-50 border-amber-100',
-      badge: 'Impor Otomatis',
+      badge: 'Data Sync',
     },
     {
-      id: 'firebase',
-      name: 'Firebase Auth & Google Sign-In',
-      description: 'Login 1-klik menggunakan akun Google Gmail dan autentikasi email terenkripsi aman.',
-      status: 'Terkoneksi (legologic-e8717)',
-      icon: ShieldCheck,
-      iconColor: 'text-orange-600 bg-orange-50 border-orange-100',
-      badge: 'Google Auth',
-    },
-    {
-      id: 'github',
-      name: 'GitHub Repository & Vercel Deploy',
-      description: 'Menyimpan source code TSX aplikasi ke repo GitHub dan melakukan auto-deploy ke cloud.',
-      status: 'Terkoneksi (ibobatsuga/legologic)',
-      icon: GithubIcon,
-      iconColor: 'text-slate-800 bg-slate-100 border-slate-200',
-      badge: 'Git Sync',
-    },
-    {
-      id: 'ai',
-      name: 'Sakelar AI Gateway (Claude Sonnet 4.6)',
-      description: 'Mesin kecerdasan buatan utama untuk menyusun arsitektur komponen web dan database.',
-      status: 'Online (api.sakelar.web.id)',
-      icon: Sparkles,
+      id: 'webhook',
+      name: 'Custom Webhooks & Otomasi',
+      description: 'Kirim notifikasi data formulir baru ke webhook kustom, Make, Zapier, atau sistem internal bisnis Anda.',
+      status: 'Siap Dikonfigurasi',
+      icon: Webhook,
       iconColor: 'text-purple-600 bg-purple-50 border-purple-100',
-      badge: 'Model Utama',
+      badge: 'Automation',
     },
   ];
 
@@ -79,7 +53,7 @@ export function ConnectorsView() {
             <span>Connectors & Integrasi Bisnis</span>
           </h1>
           <p className="text-xs text-slate-500">
-            Hubungkan aplikasi LegoLogic Anda ke layanan pembayaran, pesan WhatsApp, database, dan cloud hosting.
+            Hubungkan aplikasi bisnis Anda ke layanan WhatsApp, pembayaran QRIS, spreadsheet, dan webhook otomasi.
           </p>
         </div>
       </header>
@@ -116,7 +90,7 @@ export function ConnectorsView() {
                     <span>{c.status}</span>
                   </div>
 
-                  <span className="text-[11px] text-slate-400">Siap Pakai</span>
+                  <span className="text-[11px] text-slate-400">Siap Digunakan</span>
                 </div>
               </div>
             );
