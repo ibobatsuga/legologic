@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { CreditWallet, AppPlan, LegoApp } from '@/types/legologic';
 import { APP_TIERS, AppTierDetails } from '@/lib/limits';
+import { generateAppSourceCode } from '@/lib/code-generator';
 import { 
   X, Check, QrCode, CreditCard, ShieldCheck, Zap, Cloud, Sparkles, 
-  Copy, Clock, ArrowRight, CheckCircle2, ChevronRight, Building2, Smartphone
+  Copy, Clock, ArrowRight, CheckCircle2, ChevronRight, Building2, Smartphone,
+  Download, ExternalLink, FileCode, Rocket
 } from 'lucide-react';
 
 interface BillingModalProps {
@@ -395,24 +397,92 @@ export function BillingModal({
             </div>
           )}
 
-          {/* STEP 3: SUCCESS CONFIRMATION */}
+          {/* STEP 3: SUCCESS CONFIRMATION & 2 DEPLOYMENT OPTIONS */}
           {paymentStep === 'success' && (
-            <div className="max-w-md mx-auto text-center space-y-5 py-6">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
-                <Check className="w-9 h-9" />
-              </div>
-
-              <div className="space-y-1">
+            <div className="max-w-lg mx-auto space-y-5 py-4">
+              <div className="text-center space-y-2">
+                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-xs">
+                  <Check className="w-8 h-8" />
+                </div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Pembayaran Berhasil Dikonfirmasi!
+                  Pembayaran Berhasil! Aplikasi Siap Digunakan
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Paket <strong className="text-slate-800">{selectedTier.name}</strong> untuk aplikasi ini telah aktif.
+                  Paket <strong>{selectedTier.name}</strong> aktif (+{selectedTier.aiCredits} Kredit AI). Silakan pilih cara menjalankan aplikasi Anda:
                 </p>
               </div>
 
+              {/* 2 DISTRIBUTION CHOICES */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                {/* OPTION 1: DOWNLOAD CODE */}
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col justify-between space-y-3">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <FileCode className="w-4 h-4 text-slate-700" />
+                        <span>Unduh Kode</span>
+                      </span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded">
+                        Rp 0 / bln
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Download file .tsx dan host mandiri di server Anda (Vercel / VPS). Bebas biaya bulanan.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const ver = currentApp?.versions?.[currentApp.versions.length - 1];
+                      const code = generateAppSourceCode(ver);
+                      const blob = new Blob([code], { type: 'text/typescript;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `${currentApp?.slug || 'aplikasi'}.tsx`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
+                      URL.revokeObjectURL(url);
+                    }}
+                    className="w-full py-2 bg-slate-900 hover:bg-black text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Unduh Kode (.tsx)</span>
+                  </button>
+                </div>
+
+                {/* OPTION 2: CLOUD MANAGED */}
+                <div className="p-4 bg-blue-50/50 rounded-2xl border border-blue-200 flex flex-col justify-between space-y-3">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                        <Cloud className="w-4 h-4 text-blue-600" />
+                        <span>Cloud LegoLogic</span>
+                      </span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded">
+                        Rp 49k / bln
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      Langsung live di subdomain LegoLogic dengan database dan auto-SSL terkelola.
+                    </p>
+                  </div>
+
+                  <a
+                    href={`/p/${currentApp?.publishedSlug || currentApp?.slug || 'satupipeline'}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <span>Buka Aplikasi Live</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+
               {/* Receipt Summary Card */}
-              <div className="bg-slate-50 rounded-2xl border border-slate-200/80 p-4 text-xs text-left space-y-2">
+              <div className="bg-slate-50 rounded-2xl border border-slate-200/80 p-3 text-xs text-left space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-slate-500">Nomor Invoice:</span>
                   <span className="font-mono font-bold text-slate-800">{invoiceId}</span>
@@ -425,10 +495,6 @@ export function BillingModal({
                   <span className="text-slate-500">Metode:</span>
                   <span className="font-semibold text-slate-800">{paymentMethod.toUpperCase()} Instant</span>
                 </div>
-                <div className="flex justify-between pt-1 border-t border-slate-200">
-                  <span className="text-slate-500">Kredit AI Ditambahkan:</span>
-                  <span className="font-bold text-blue-600">+{selectedTier.aiCredits} Kredit AI</span>
-                </div>
               </div>
 
               <button
@@ -436,9 +502,9 @@ export function BillingModal({
                   setPaymentStep('select');
                   onClose();
                 }}
-                className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                className="w-full py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
               >
-                Lanjutkan Membangun Aplikasi
+                Kembali ke Workspace
               </button>
             </div>
           )}

@@ -180,6 +180,56 @@ export function UsageView({ wallet, currentApp, onOpenBilling }: UsageViewProps)
             })}
           </div>
         </section>
+
+        {/* SECTION: 2 CHOICES OF HOSTING EXPLAINED */}
+        <section className="bg-white rounded-3xl border border-slate-200/90 p-6 md:p-8 shadow-2xs space-y-6">
+          <div className="space-y-1">
+            <h2 className="text-sm font-bold text-slate-900">
+              Dua Pilihan Deployment Setelah Aplikasi Selesai Dibangun
+            </h2>
+            <p className="text-xs text-slate-500">
+              Setiap pengguna yang telah membeli aplikasi memiliki kebebasan penuh dalam memilih metode hosting:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* OPSI 1 */}
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                  <span>1. Unduh Kode & Self-Hosted</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full">
+                  Rp 0 / bln (Bebas Biaya)
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Unduh file source code lengkap (Next.js / TSX / Tailwind) beserta skema database. Anda bebas mengurus dan men-deploy sendiri di Vercel, Netlify, cPanel, atau VPS tanpa biaya langganan bulanan ke LegoLogic.
+              </p>
+              <div className="text-[11px] text-slate-600 font-medium pt-1 border-t border-slate-200">
+                Cocok untuk: Developer atau tim yang sudah punya server sendiri.
+              </div>
+            </div>
+
+            {/* OPSI 2 */}
+            <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 flex items-center gap-2">
+                  <span>2. Managed Cloud LegoLogic</span>
+                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-full">
+                  Rp 49.000 / bln
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Gunakan infrastruktur cloud LegoLogic. Aplikasi langsung live seketika di subdomain publik, lengkap dengan database cloud terkelola, sertifikat SSL HTTPS otomatis, dan maintenance zero-setup.
+              </p>
+              <div className="text-[11px] text-blue-900 font-medium pt-1 border-t border-blue-200">
+                Cocok untuk: Pemilik bisnis yang ingin langsung live tanpa repot teknis server.
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );

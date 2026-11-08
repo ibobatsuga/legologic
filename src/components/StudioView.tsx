@@ -6,6 +6,7 @@ import {
   LegoApp, AppVersion, CreditWallet, User, Organization, TableDefinition 
 } from '@/types/legologic';
 import { InteractiveAppRenderer } from '@/components/InteractiveAppRenderer';
+import { DeployModal } from '@/components/DeployModal';
 import { generateAppSourceCode } from '@/lib/code-generator';
 import { 
   Send, Sparkles, Eye, Code2, ArrowUp, Plus, Paperclip, 
@@ -73,6 +74,7 @@ export function StudioView({
   const [isChecklistOpen, setIsChecklistOpen] = useState(true);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [isDeployModalOpen, setIsDeployModalOpen] = useState(false);
 
   // Check if project is in blank/clean state (No versions or versionNumber === 0)
   const isCleanBlank = !app.versions || app.versions.length === 0 || app.currentVersion === 0;
@@ -211,27 +213,7 @@ export function StudioView({
       alert('Aplikasi masih kosong. Silakan buka template atau generate aplikasi terlebih dahulu.');
       return;
     }
-
-    const updatedApp: LegoApp = {
-      ...app,
-      isPublished: true,
-      publishedSlug: app.publishedSlug || app.slug,
-      publishedAt: new Date().toISOString(),
-    };
-    onUpdateApp(updatedApp);
-
-    try {
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {}
-
-    const fullUrl = `${window.location.origin}/p/${app.publishedSlug || app.slug}`;
-    navigator.clipboard.writeText(fullUrl);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 3000);
+    setIsDeployModalOpen(true);
   };
 
   const handleDataChangeFromPreview = (newTables: TableDefinition[]) => {
@@ -634,6 +616,16 @@ export function StudioView({
           )}
         </div>
       </div>
+
+      {/* Deploy & Distribution Modal (Option 1: Download Code vs Option 2: Managed Cloud) */}
+      <DeployModal
+        isOpen={isDeployModalOpen}
+        onClose={() => setIsDeployModalOpen(false)}
+        app={app}
+        onPublishSuccess={(updated) => {
+          onUpdateApp(updated);
+        }}
+      />
     </main>
   );
 }
