@@ -40,6 +40,7 @@ interface StudioViewProps {
   wallet: CreditWallet;
   user: User;
   organization: Organization;
+  activeNavTab?: string;
   onUpdateApp: (app: LegoApp) => void;
   onUpdateWallet: (wallet: CreditWallet) => void;
   onSelectApp: (appId: string) => void;
@@ -54,6 +55,7 @@ export function StudioView({
   wallet,
   user,
   organization,
+  activeNavTab = 'studio',
   onUpdateApp,
   onUpdateWallet,
   onSelectApp,
@@ -368,7 +370,11 @@ export function StudioView({
   return (
     <main className="flex-1 flex flex-col md:flex-row h-screen overflow-hidden bg-white">
       {/* MIDDLE COLUMN: Chat, Thinking & Specification (Image 1 & 3 left) */}
-      <div className="w-full md:w-[460px] lg:w-[500px] border-r border-slate-200/80 flex flex-col shrink-0 h-full bg-white select-none">
+      <div className={`border-r border-slate-200/80 flex flex-col shrink-0 h-full bg-white select-none transition-all duration-200 ${
+        activeNavTab === 'chat' 
+          ? 'w-full md:w-[580px] lg:w-[640px]' 
+          : 'w-full md:w-[460px] lg:w-[500px]'
+      }`}>
         {/* Top Header Bar */}
         <div className="p-3.5 px-5 border-b border-slate-200/70 flex items-center justify-between gap-2 bg-white">
           <div className="flex items-center gap-2">
@@ -377,6 +383,9 @@ export function StudioView({
             </h2>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
               v{currentVersion.versionNumber}
+            </span>
+            <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+              {activeNavTab === 'chat' ? '💬 Chat' : '🖥️ Studio'}
             </span>
           </div>
 

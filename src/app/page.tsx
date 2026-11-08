@@ -15,8 +15,8 @@ import { AuthUserProfile } from '@/lib/firebase';
 export default function Home() {
   const [apps, setApps] = useState<LegoApp[]>(ALL_TEMPLATES);
   const [currentAppId, setCurrentAppId] = useState<string>(SATU_PIPELINE_APP.id);
-  const [currentNavTab, setCurrentNavTab] = useState<string>('studio');
-  const [isHomeState, setIsHomeState] = useState<boolean>(false);
+  const [currentNavTab, setCurrentNavTab] = useState<string>('chat');
+  const [isHomeState, setIsHomeState] = useState<boolean>(true); // Default: Project Baru
   
   const [isBillingOpen, setIsBillingOpen] = useState(false);
   const [isTeamOpen, setIsTeamOpen] = useState(false);
@@ -184,7 +184,7 @@ export default function Home() {
     <div className="flex h-screen w-screen overflow-hidden bg-[#fafafa] antialiased">
       {/* Sleek Left Sidebar (Matching user screenshots) */}
       <Sidebar
-        currentTab={isHomeState ? 'templates' : currentNavTab}
+        currentTab={isHomeState ? 'new' : currentNavTab}
         onSelectTab={(tab) => {
           setCurrentNavTab(tab);
           if (tab === 'templates' || tab === 'library') {
@@ -211,6 +211,7 @@ export default function Home() {
         wallet={wallet}
         user={user}
         organization={organization}
+        activeNavTab={currentNavTab}
         onUpdateApp={handleUpdateApp}
         onUpdateWallet={handleUpdateWallet}
         onSelectApp={(appId) => {

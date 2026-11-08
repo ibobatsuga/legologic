@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { 
-  Plus, FolderGit2, Zap, Database, Layers, Sparkles, 
+  Plus, MessageSquare, Monitor, FolderGit2, Zap, Database, Layers, Sparkles, 
   Settings, ChevronDown, ChevronsUpDown, ShieldCheck, History 
 } from 'lucide-react';
 import { User, Organization, CreditWallet } from '@/types/legologic';
@@ -32,7 +32,8 @@ export function Sidebar({
   wallet,
 }: SidebarProps) {
   const navItems = [
-    { id: 'studio', label: 'Studio & Chat', icon: Sparkles },
+    { id: 'chat', label: 'Chat', icon: MessageSquare },
+    { id: 'studio', label: 'Studio', icon: Monitor },
     { id: 'library', label: 'Library', icon: FolderGit2 },
     { id: 'usage', label: 'Usage / Kredit', icon: Zap, badge: `${wallet.aiCredits} AI` },
     { id: 'database', label: 'Database', icon: Database },
