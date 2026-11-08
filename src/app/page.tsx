@@ -270,6 +270,7 @@ export default function Home() {
             setCurrentAppId(appId);
           }}
           onOpenBilling={() => setIsBillingOpen(true)}
+          onNavigateToTab={(tab) => setCurrentNavTab(tab)}
         />
       ) : currentNavTab === 'library' || currentNavTab === 'templates' ? (
         /* MENU 3: Library (Recent Projects + Templates Gallery without chat box) */
@@ -298,6 +299,7 @@ export default function Home() {
             setCurrentAppId(appId);
           }}
           onOpenBilling={() => setIsBillingOpen(true)}
+          onNavigateToTab={(tab) => setCurrentNavTab(tab)}
         />
       )}
 

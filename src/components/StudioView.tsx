@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { 
   LegoApp, AppVersion, CreditWallet, User, Organization, TableDefinition 
@@ -45,8 +45,7 @@ interface StudioViewProps {
   onUpdateWallet: (wallet: CreditWallet) => void;
   onSelectApp: (appId: string) => void;
   onOpenBilling: () => void;
-  isHomeState?: boolean;
-  onExitHomeState?: () => void;
+  onNavigateToTab?: (tab: string) => void;
 }
 
 export function StudioView({
@@ -60,8 +59,7 @@ export function StudioView({
   onUpdateWallet,
   onSelectApp,
   onOpenBilling,
-  isHomeState = false,
-  onExitHomeState,
+  onNavigateToTab,
 }: StudioViewProps) {
   // Right pane tab: 'preview' vs 'code'
   const [rightTab, setRightTab] = useState<'preview' | 'code'>('preview');
@@ -76,24 +74,31 @@ export function StudioView({
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  // Check if project is in blank/draft state (No versions or versionNumber === 0)
+  // Check if project is in blank/clean state (No versions or versionNumber === 0)
   const isCleanBlank = !app.versions || app.versions.length === 0 || app.currentVersion === 0;
 
   // Interactive checklist tasks
-  const [checklistTasks, setChecklistTasks] = useState(
-    isCleanBlank 
-      ? [
-          { id: 't1', text: 'Ketik instruksi kebutuhan aplikasi Anda di prompt box', done: false },
-          { id: 't2', text: 'Claude Sonnet 4.6 merancang komponen UI & skema database', done: false },
-          { id: 't3', text: 'Preview interaktif & kode TSX siap dikustomisasi', done: false },
-        ]
-      : [
-          { id: 't1', text: 'Build pipeline kanban stages & consent tracking', done: true },
-          { id: 't2', text: 'Configure Rupiah currency & lead contact fields', done: true },
-          { id: 't3', text: 'Wire up WhatsApp click-to-chat action', done: true },
-          { id: 't4', text: 'Connect live database table & persist record updates', done: true },
-        ]
-  );
+  const [checklistTasks, setChecklistTasks] = useState([
+    { id: 't1', text: 'Buka template di Library atau ketik instruksi baru', done: false },
+    { id: 't2', text: 'AI merancang komponen antarmuka & database', done: false },
+    { id: 't3', text: 'Preview dan kode siap digunakan', done: false },
+  ]);
+
+  useEffect(() => {
+    if (isCleanBlank) {
+      setChecklistTasks([
+        { id: 't1', text: 'Buka template di Library atau ketik instruksi baru', done: false },
+        { id: 't2', text: 'AI merancang komponen antarmuka & database', done: false },
+        { id: 't3', text: 'Preview dan kode siap digunakan', done: false },
+      ]);
+    } else {
+      setChecklistTasks([
+        { id: 't1', text: `Memuat struktur modul: ${app.name}`, done: true },
+        { id: 't2', text: 'Tabel database & formulir input aktif', done: true },
+        { id: 't3', text: 'Preview interaktif & kode siap dikustomisasi', done: true },
+      ]);
+    }
+  }, [app.id, isCleanBlank, app.name]);
 
   const currentVersion: AppVersion | undefined = isCleanBlank 
     ? undefined 
@@ -122,7 +127,7 @@ export function StudioView({
 
     try {
       if (isCleanBlank) {
-        // Generating initial app v1
+        // Generating initial app v1 from blank
         setTimeout(() => setGenerationStep('Menganalisis kebutuhan & merancang skema database...'), 1200);
         setTimeout(() => setGenerationStep('Menyusun arsitektur komponen & antarmuka interaktif...'), 2400);
 
@@ -151,12 +156,6 @@ export function StudioView({
 
         onUpdateApp(generatedApp);
         onUpdateWallet(nextWallet);
-
-        setChecklistTasks([
-          { id: 't1', text: 'Ketik instruksi kebutuhan aplikasi Anda', done: true },
-          { id: 't2', text: 'Claude Sonnet 4.6 merancang komponen UI & skema database', done: true },
-          { id: 't3', text: 'Preview interaktif & kode TSX siap dikustomisasi', done: true },
-        ]);
       } else {
         // Revising existing app
         setTimeout(() => setGenerationStep('Menganalisis pembaruan fitur & tata letak...'), 1200);
@@ -196,11 +195,6 @@ export function StudioView({
 
         onUpdateApp(updatedApp);
         onUpdateWallet(nextWallet);
-
-        setChecklistTasks(prev => [
-          ...prev.map(t => ({ ...t, done: true })),
-          { id: 't-' + Date.now(), text: `Implementasi: ${text.substring(0, 45)}`, done: true }
-        ]);
       }
 
       setPromptInput('');
@@ -214,7 +208,7 @@ export function StudioView({
 
   const handlePublish = () => {
     if (isCleanBlank) {
-      alert('Aplikasi masih kosong. Silakan generate aplikasi terlebih dahulu.');
+      alert('Aplikasi masih kosong. Silakan buka template atau generate aplikasi terlebih dahulu.');
       return;
     }
 
@@ -256,7 +250,7 @@ export function StudioView({
   return (
     <main className="flex-1 flex flex-col md:flex-row h-screen overflow-hidden bg-white">
       {/* MIDDLE COLUMN: Chat, Thinking & Specification (Image 1 & 3 left) */}
-      <div className="w-full md:w-[440px] lg:w-[480px] border-r border-slate-200/80 flex flex-col shrink-0 h-full bg-white select-none transition-all duration-200">
+      <div className="w-full md:w-[420px] lg:w-[460px] border-r border-slate-200/80 flex flex-col shrink-0 h-full bg-white select-none transition-all duration-200">
         {/* Top Header Bar */}
         <div className="p-3.5 px-5 border-b border-slate-200/70 flex items-center justify-between gap-2 bg-white">
           <div className="flex items-center gap-2">
@@ -264,7 +258,7 @@ export function StudioView({
               {app.name}
             </h2>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-              {isCleanBlank ? 'Draft' : `v${currentVersion?.versionNumber}`}
+              {isCleanBlank ? 'Project Baru' : `v${currentVersion?.versionNumber}`}
             </span>
             <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
               Menu 2 Studio
@@ -287,7 +281,7 @@ export function StudioView({
               <div className="flex items-center gap-2 font-medium text-[11px]">
                 <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                 <span>
-                  {isCleanBlank ? 'AI Assistant Ready' : 'Thinking trace (Sakelar AI)'}
+                  {isCleanBlank ? 'Status: Siap Menerima Instruksi' : 'Thinking trace (Sakelar AI)'}
                 </span>
               </div>
               {isThinkingOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -297,21 +291,21 @@ export function StudioView({
               <div className="p-3 pt-0 text-[11px] text-slate-600 font-mono space-y-1.5 border-t border-slate-200/50">
                 {isCleanBlank ? (
                   <div className="py-1 text-slate-500">
-                    Kanvas project baru siap dibangun. Menunggu instruksi pertama dari Anda...
+                    Kanvas project baru masih bersih. Buka template di Library atau ketik instruksi di prompt bar bawah.
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400">📄</span>
-                      <span>Checked <strong className="text-slate-800">design-system.json</strong> for modern components</span>
+                      <span>Menyiapkan modul arsitektur dan skema database untuk <strong className="text-slate-800">{app.name}</strong></span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400">🔍</span>
-                      <span>Resolved data columns: WhatsApp click-to-chat, currency, badges</span>
+                      <span>Format mata uang Rupiah (Rp) dan aksi interaktif tersambung</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400">🖼️</span>
-                      <span>Applied polished responsive Kanban & data table views</span>
+                      <span>Preview interaktif siap diuji langsung</span>
                     </div>
                   </>
                 )}
@@ -322,37 +316,13 @@ export function StudioView({
           {/* Specification Scope */}
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-slate-900">
-              {isCleanBlank ? 'Mulai Membangun Aplikasi' : 'Defining the Scope & Features'}
+              {isCleanBlank ? 'Project Baru' : app.name}
             </h3>
             <p className="text-slate-600 leading-normal">
               {isCleanBlank 
-                ? 'Ketik instruksi di bawah ini untuk merancang aplikasi web baru Anda. AI akan otomatis membuat komponen visual, database lokal, dan metrik analitik.'
-                : (currentVersion?.changelog || `Workflow untuk ${app.name} telah tersusun secara visual dan interaktif.`)}
+                ? 'Kanvas ini bersih dari kode awal. Anda dapat memilih template siap-pakai di Library atau mengetik instruksi di bawah untuk membuat aplikasi baru.'
+                : (currentVersion?.changelog || app.description)}
             </p>
-
-            {!isCleanBlank && currentVersion && (
-              <div>
-                <h4 className="font-bold text-slate-900 mb-1.5">Fitur Tersedia:</h4>
-                <ul className="space-y-1.5 text-slate-600">
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-slate-400">•</span>
-                    <span>Visual pipeline & stages interaktif dengan formatting Rupiah</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-slate-400">•</span>
-                    <span>Database tabel dengan WhatsApp click-to-chat langsung</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-slate-400">•</span>
-                    <span>Metrik performa KPI row dengan tren</span>
-                  </li>
-                  <li className="flex items-start gap-1.5">
-                    <span className="text-slate-400">•</span>
-                    <span>Formulir tambah data interaktif dengan validasi</span>
-                  </li>
-                </ul>
-              </div>
-            )}
           </div>
 
           {/* Progress Checklist Card */}
@@ -361,7 +331,7 @@ export function StudioView({
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800">
                   <span className="text-blue-600">≡</span>
-                  <span>{doneCount}/{checklistTasks.length} checklist</span>
+                  <span>{doneCount}/{checklistTasks.length} status</span>
                 </div>
                 <button 
                   onClick={() => setIsChecklistOpen(false)}
@@ -404,7 +374,7 @@ export function StudioView({
           )}
         </div>
 
-        {/* Bottom Floating Prompt Card (Image 1 & 3 bottom) */}
+        {/* Bottom Floating Prompt Card */}
         <div className="p-3.5 border-t border-slate-200/80 bg-white">
           <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-3 space-y-2 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
             <textarea
@@ -417,7 +387,7 @@ export function StudioView({
                   handleSendPrompt();
                 }
               }}
-              placeholder={isCleanBlank ? "Ketik instruksi aplikasi baru di sini..." : "Build me an app... (Ketik instruksi revisi dalam Bahasa Indonesia)"}
+              placeholder={isCleanBlank ? "Ketik instruksi aplikasi baru di sini..." : "Ketik instruksi revisi dalam Bahasa Indonesia..."}
               className="w-full text-xs bg-transparent border-0 focus:outline-none resize-none text-slate-900 placeholder:text-slate-400 font-normal leading-relaxed"
             />
 
@@ -437,22 +407,9 @@ export function StudioView({
                 >
                   <Paperclip className="w-3.5 h-3.5" />
                 </button>
-                <button 
-                  type="button"
-                  onClick={() => setPromptInput('Tambahkan kolom WhatsApp dan tombol follow-up di tabel prospek.')}
-                  className="px-2 py-0.5 text-[10px] text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-md flex items-center gap-1 border border-slate-200"
-                >
-                  <Wand2 className="w-3 h-3 text-amber-500" />
-                  <span>Improve prompt</span>
-                </button>
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-slate-400">
-                  <FigmaIcon className="w-3.5 h-3.5" />
-                  <GithubIcon className="w-3.5 h-3.5" />
-                </div>
-
                 <button
                   onClick={() => handleSendPrompt()}
                   disabled={!promptInput.trim() || isGenerating}
@@ -574,45 +531,39 @@ export function StudioView({
           {rightTab === 'preview' ? (
             /* PREVIEW TAB */
             isCleanBlank ? (
-              /* Ultra-clean Blank Canvas State (No messy template code!) */
-              <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200/90 shadow-sm p-8 flex flex-col items-center text-center space-y-5">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-2xs">
-                  <Sparkles className="w-6 h-6" />
+              /* Ultra-clean Blank Canvas State (Only shows preview if template is opened!) */
+              <div className="w-full h-full max-w-md mx-auto flex flex-col items-center justify-center text-center p-8 space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200/90 shadow-2xs flex items-center justify-center text-slate-400">
+                  <LayoutGrid className="w-6 h-6 text-slate-400" />
                 </div>
 
-                <div className="space-y-1.5 max-w-sm">
+                <div className="space-y-1.5">
                   <h3 className="text-sm font-bold text-slate-900">
-                    Kanvas Bersih: Siap Membangun
+                    Kanvas Bersih (Project Baru)
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Studio Anda bersih dari kode. Ketik ide aplikasi Anda pada prompt bar di samping atau klik inspirasi cepat di bawah untuk mulai membuat:
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-xs mx-auto">
+                    Belum ada tampilan yang dimuat. Preview aplikasi hanya akan muncul jika Anda membuka template dari Library atau membuat aplikasi baru via Chat.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full pt-1">
-                  {[
-                    { label: '💬 CRM WhatsApp', prompt: 'Buatkan aplikasi CRM WhatsApp dengan tracking leads dan pipeline visual.' },
-                    { label: '📦 Kasir & Inventori', prompt: 'Buatkan aplikasi manajemen inventori stok barang dan kasir toko retail.' },
-                    { label: '🗓️ Booking Jadwal', prompt: 'Buatkan sistem reservasi booking jadwal konsultasi dan nomor antrean.' },
-                    { label: '📑 Portal Invoice', prompt: 'Buatkan portal invoice tagihan klien dengan status pembayaran dan approval.' },
-                  ].map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => setPromptInput(item.prompt)}
-                      className="p-3 text-left rounded-xl border border-slate-200/80 hover:border-blue-400 hover:bg-blue-50/30 transition-all text-xs group"
-                    >
-                      <div className="font-semibold text-slate-800 group-hover:text-blue-600 transition-colors">
-                        {item.label}
-                      </div>
-                      <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
-                        {item.prompt}
-                      </div>
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2 pt-2">
+                  <button
+                    onClick={() => onNavigateToTab?.('library')}
+                    className="px-3.5 py-2 bg-slate-900 hover:bg-black text-white text-xs font-semibold rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <span>Buka Library Template</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => onNavigateToTab?.('chat')}
+                    className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 shadow-2xs transition-colors"
+                  >
+                    <span>Mulai di Chat</span>
+                  </button>
                 </div>
               </div>
             ) : (
-              /* Active App Rendered Inside Device Frame */
+              /* Active App Rendered Inside Device Frame (ONLY WHEN TEMPLATE / GENERATED APP IS LOADED) */
               <div 
                 className={`transition-all duration-300 w-full ${
                   deviceMode === 'mobile' ? 'max-w-[390px] border-8 border-slate-900 rounded-[44px] overflow-hidden shadow-2xl bg-white ring-1 ring-slate-900/10' :
@@ -646,30 +597,39 @@ export function StudioView({
             <div className="w-full h-full max-w-4xl bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
               <div className="p-3 px-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 text-xs">
                 <span className="font-mono text-slate-600 font-semibold">{app.slug}.tsx</span>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(sourceCode);
-                    setCopiedCode(true);
-                    setTimeout(() => setCopiedCode(false), 3000);
-                  }}
-                  className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1 shadow-2xs"
-                >
-                  {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiedCode ? 'Tersalin' : 'Copy Code'}</span>
-                </button>
+                {!isCleanBlank && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(sourceCode);
+                      setCopiedCode(true);
+                      setTimeout(() => setCopiedCode(false), 3000);
+                    }}
+                    className="px-2.5 py-1 text-xs font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 flex items-center gap-1 shadow-2xs"
+                  >
+                    {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedCode ? 'Tersalin' : 'Copy Code'}</span>
+                  </button>
+                )}
               </div>
 
-              {/* Code viewer with line numbers */}
-              <div className="flex-1 overflow-auto p-4 font-mono text-[11px] leading-relaxed flex text-slate-800">
-                <div className="text-slate-300 pr-4 select-none text-right shrink-0 border-r border-slate-100">
-                  {codeLines.map((_, i) => (
-                    <div key={i}>{i + 1}</div>
-                  ))}
+              {/* Code viewer: Completely clean if Project Baru! */}
+              {isCleanBlank ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400 font-mono text-xs space-y-1 select-none">
+                  <p>// Project Baru</p>
+                  <p>// Belum ada kode yang dimuat.</p>
                 </div>
-                <pre className="pl-4 overflow-x-auto text-slate-700">
-                  <code>{sourceCode}</code>
-                </pre>
-              </div>
+              ) : (
+                <div className="flex-1 overflow-auto p-4 font-mono text-[11px] leading-relaxed flex text-slate-800">
+                  <div className="text-slate-300 pr-4 select-none text-right shrink-0 border-r border-slate-100">
+                    {codeLines.map((_, i) => (
+                      <div key={i}>{i + 1}</div>
+                    ))}
+                  </div>
+                  <pre className="pl-4 overflow-x-auto text-slate-700">
+                    <code>{sourceCode}</code>
+                  </pre>
+                </div>
+              )}
             </div>
           )}
         </div>
