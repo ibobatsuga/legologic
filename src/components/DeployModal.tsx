@@ -215,7 +215,7 @@ export function DeployModal({
               </div>
 
               <div className="text-[11px] font-bold text-slate-700 pt-1">
-                Biaya Hosting Bulanan: <span className="text-blue-700">Rp 49.000 / bln</span>
+                Biaya Hosting Bulanan: <span className="text-blue-700">Rp 99.000 / bln</span>
               </div>
             </div>
           </div>
@@ -348,7 +348,7 @@ export function DeployModal({
                   </div>
 
                   <div className="text-[11px] text-slate-500 flex items-center justify-between">
-                    <span>Tagihan Hosting: <strong>Rp 49.000 / bulan</strong></span>
+                    <span>Tagihan Hosting: <strong>Rp 99.000 / bulan</strong></span>
                     <span className="text-emerald-700 font-semibold">Bulan ke-1 sudah aktif</span>
                   </div>
                 </div>

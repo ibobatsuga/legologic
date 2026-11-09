@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { 
   Plus, MessageSquare, Monitor, FolderGit2, Zap, Database, Layers, Sparkles, 
-  Settings, ChevronDown, ChevronsUpDown, ShieldCheck, History 
+  Settings, ChevronDown, ChevronsUpDown, ShieldCheck, History, Palette 
 } from 'lucide-react';
 import { User, Organization, CreditWallet } from '@/types/legologic';
 
@@ -35,6 +35,7 @@ export function Sidebar({
     { id: 'chat', label: 'Chat', icon: MessageSquare },
     { id: 'studio', label: 'Studio', icon: Monitor },
     { id: 'library', label: 'Library', icon: FolderGit2 },
+    { id: 'gallery', label: 'Galeri UI', icon: Palette, badge: 'Dribbble' },
     { id: 'database', label: 'Database', icon: Database },
     { id: 'history', label: 'History & Versi', icon: History },
     { id: 'connectors', label: 'Connectors', icon: Layers },

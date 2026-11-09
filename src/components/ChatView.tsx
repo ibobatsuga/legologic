@@ -5,7 +5,7 @@ import {
   Send, Sparkles, Plus, Paperclip, Wand2, ArrowUp, 
   ExternalLink, ArrowRight, Layers, Bot, User as UserIcon,
   CheckCircle2, Clock, Terminal, Rocket, FileText, HelpCircle,
-  ListChecks, ChevronRight
+  ListChecks, ChevronRight, Palette
 } from 'lucide-react';
 import { LegoApp, CreditWallet, User, PRDDocument } from '@/types/legologic';
 import { analyzePromptCompleteness, generateFullPRD, convertPRDToLegoApp } from '@/lib/prd-engine';
@@ -49,6 +49,7 @@ interface ChatViewProps {
   user: User;
   onOpenInStudio: (app: LegoApp) => void;
   onOpenBilling: () => void;
+  onOpenGallery?: () => void;
 }
 
 export function ChatView({
@@ -56,6 +57,7 @@ export function ChatView({
   user,
   onOpenInStudio,
   onOpenBilling,
+  onOpenGallery,
 }: ChatViewProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -64,12 +66,18 @@ export function ChatView({
       text: 'Halo Om Bobi! Saya asisten GENESIS AI. Untuk memastikan aplikasi yang kita bangun tepat guna dan tidak meleset dari kebutuhan bisnis Anda, kita akan melalui 3 alur kerja terstruktur:\n\n1. **Wawancara Pengguna** (menggali persona, tujuan, dan aturan bisnis)\n2. **Penyusunan PRD Resmi** (10 poin spesifikasi teknis lengkap)\n3. **Masuk ke Produksi** (generate aplikasi live di Studio)\n\nSilakan ceritakan ide aplikasi yang ingin Anda buat hari ini.',
       timestamp: '10:00',
       quickReplies: [
-        'Aplikasi Rental Mobil & Motor',
-        'Manajemen Inventori & Stok Gudang Toko',
-        'Sistem Booking Lapangan Futsal / Olahraga',
-        'Tiket Servis Bengkel & Pengerjaan Teknis',
-        'Kasir POS & Pesanan Kedai Kopi',
-        'Pengelolaan Kamar Kost & Kontrakan'
+        'Web Radio Streaming & Audio Player',
+        'Website Berita & Media Online',
+        'Web Sistem Informasi Akademik (SIAKAD)',
+        'Portal PPDB Online Sekolah',
+        'Web Loket PPOB & Pembayaran',
+        'Web Marketplace & Jual Beli',
+        'Web Iklan Baris & Classified Ads',
+        'Portal Lowongan Kerja & Karir',
+        'Website Desa & Layanan Warga',
+        'Website Pemerintah & Instansi',
+        'Aplikasi Android (Mobile PWA)',
+        'Web Rental Mobil',
       ]
     }
   ]);
@@ -327,6 +335,15 @@ export function ChatView({
                         <span>{reply}</span>
                       </button>
                     ))}
+                    {onOpenGallery && (
+                      <button
+                        onClick={onOpenGallery}
+                        className="text-[11px] text-left px-3 py-1.5 bg-pink-50 hover:bg-pink-100 hover:border-pink-300 text-pink-700 font-semibold rounded-xl border border-pink-200 shadow-2xs transition-colors flex items-center gap-1.5 active:scale-98"
+                      >
+                        <Palette className="w-3.5 h-3.5 text-pink-600 shrink-0" />
+                        <span>Pilih Gaya Desain dari Galeri UI (Dribbble/Magnific)</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

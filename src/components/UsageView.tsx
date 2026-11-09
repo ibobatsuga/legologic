@@ -218,7 +218,7 @@ export function UsageView({ wallet, currentApp, onOpenBilling }: UsageViewProps)
                   <span>2. Managed Cloud GENESIS</span>
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-600 text-white rounded-full">
-                  Rp 49.000 / bln
+                  Rp 99.000 / bln
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed">

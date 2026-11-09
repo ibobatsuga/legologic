@@ -125,7 +125,7 @@ export function BillingModal({
 
               {/* 3 Pricing Cards: Minimal, Standar, Optimal */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* MINIMAL (Rp 19.000) */}
+                {/* MINIMAL (Rp 99.000) */}
                 <div 
                   className={`border rounded-2xl p-4.5 flex flex-col justify-between transition-all hover:border-blue-400 ${
                     selectedPlanId === 'MINIMAL' ? 'border-blue-500 bg-blue-50/20 shadow-xs' : 'border-slate-200'
@@ -136,7 +136,7 @@ export function BillingModal({
                       {APP_TIERS.MINIMAL.name}
                     </span>
                     <div className="text-2xl font-extrabold text-slate-900 mt-1">
-                      Rp 19.000
+                      Rp 99.000
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium">sekali bayar / app</span>
                     <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
@@ -157,11 +157,11 @@ export function BillingModal({
                     onClick={() => handleProceedToPayment('MINIMAL')}
                     className="mt-5 w-full py-2 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
                   >
-                    Pilih Minimal (Rp 19rb)
+                    Pilih Minimal (Rp 99rb)
                   </button>
                 </div>
 
-                {/* STANDAR (Rp 49.000) - Most Popular */}
+                {/* STANDAR (Rp 249.000) - Most Popular */}
                 <div 
                   className="border-2 border-amber-400 rounded-2xl p-4.5 bg-amber-50/20 relative flex flex-col justify-between shadow-xs hover:border-amber-500 transition-all"
                 >
@@ -173,7 +173,7 @@ export function BillingModal({
                       {APP_TIERS.STANDAR.name}
                     </span>
                     <div className="text-2xl font-extrabold text-slate-900 mt-1">
-                      Rp 49.000
+                      Rp 249.000
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium">sekali bayar / app</span>
                     <p className="text-[11px] text-slate-600 mt-2 leading-relaxed">
@@ -194,11 +194,11 @@ export function BillingModal({
                     onClick={() => handleProceedToPayment('STANDAR')}
                     className="mt-5 w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold shadow-xs transition-colors"
                   >
-                    Pilih Standar (Rp 49rb)
+                    Pilih Standar (Rp 249rb)
                   </button>
                 </div>
 
-                {/* OPTIMAL (Rp 99.000) */}
+                {/* OPTIMAL (Rp 499.000) */}
                 <div 
                   className={`border rounded-2xl p-4.5 flex flex-col justify-between transition-all hover:border-purple-400 ${
                     selectedPlanId === 'OPTIMAL' ? 'border-purple-500 bg-purple-50/20 shadow-xs' : 'border-slate-200'
@@ -214,7 +214,7 @@ export function BillingModal({
                       </span>
                     </div>
                     <div className="text-2xl font-extrabold text-slate-900 mt-1">
-                      Rp 99.000
+                      Rp 499.000
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium">sekali bayar / app</span>
                     <p className="text-[11px] text-slate-500 mt-2 leading-relaxed">
@@ -235,7 +235,7 @@ export function BillingModal({
                     onClick={() => handleProceedToPayment('OPTIMAL')}
                     className="mt-5 w-full py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
                   >
-                    Pilih Optimal (Rp 99rb)
+                    Pilih Optimal (Rp 499rb)
                   </button>
                 </div>
               </div>
@@ -461,7 +461,7 @@ export function BillingModal({
                         <span>Cloud GENESIS</span>
                       </span>
                       <span className="text-[9px] font-bold px-1.5 py-0.2 bg-blue-100 text-blue-700 rounded">
-                        Rp 49k / bln
+                        Rp 99k / bln
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-relaxed">

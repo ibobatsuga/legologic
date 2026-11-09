@@ -14,6 +14,8 @@ import { DatabaseView } from '@/components/DatabaseView';
 import { HistoryView } from '@/components/HistoryView';
 import { ConnectorsView } from '@/components/ConnectorsView';
 import { SettingsView } from '@/components/SettingsView';
+import { UIGalleryView } from '@/components/UIGalleryView';
+import { UIGalleryItem } from '@/lib/ui-gallery';
 import { BillingModal } from '@/components/BillingModal';
 import { TeamModal } from '@/components/TeamModal';
 import { AuthModal } from '@/components/AuthModal';
@@ -232,6 +234,37 @@ export default function Home() {
     setCurrentNavTab('studio');
   };
 
+  // Handler to select and apply a UI design style from Dribbble / Magnific gallery
+  const handleSelectUIStyle = (styleItem: UIGalleryItem) => {
+    if (currentApp) {
+      const updatedVersions = currentApp.versions.map((v, i) => {
+        if (i === currentApp.versions.length - 1) {
+          return {
+            ...v,
+            primaryColor: styleItem.colors.primary,
+            accentColor: styleItem.colors.accent,
+            tagline: `${v.tagline} • Style: ${styleItem.title}`,
+          };
+        }
+        return v;
+      });
+      const updatedApp: LegoApp = {
+        ...currentApp,
+        versions: updatedVersions,
+        updatedAt: new Date().toISOString(),
+      };
+      handleUpdateApp(updatedApp);
+      handleAddAuditLog({
+        userId: user.id,
+        userName: user.name,
+        action: `Terapkan Desain UI "${styleItem.title}"`,
+        details: `Gaya visual ${styleItem.badge} (${styleItem.categoryLabel}) dengan font ${styleItem.typography}`,
+        type: 'build',
+      });
+    }
+    setCurrentNavTab('studio');
+  };
+
   const handleRollbackToVersion = (versionNumber: number) => {
     const updatedApp: LegoApp = {
       ...currentApp,
@@ -275,6 +308,7 @@ export default function Home() {
           user={user}
           onOpenInStudio={handleOpenAppInStudio}
           onOpenBilling={() => setIsBillingOpen(true)}
+          onOpenGallery={() => setCurrentNavTab('gallery')}
         />
       ) : currentNavTab === 'studio' ? (
         /* MENU 2: Studio View (Clean Canvas by default, or active app) */
@@ -294,7 +328,7 @@ export default function Home() {
           onNavigateToTab={(tab) => setCurrentNavTab(tab)}
         />
       ) : currentNavTab === 'library' ? (
-        /* MENU 3: Library (Recent Projects + Templates Gallery without chat box) */
+        /* MENU 3: Library (Recent Projects + Templates Gallery + UI Gallery tab) */
         <LibraryView
           recentApps={apps.filter(a => a.id !== 'app-new-blank')}
           templates={ALL_TEMPLATES}
@@ -304,6 +338,13 @@ export default function Home() {
           }}
           onUseTemplate={handleUseTemplate}
           onNewBuild={handleNewBuild}
+          onSelectUIStyle={handleSelectUIStyle}
+        />
+      ) : currentNavTab === 'gallery' ? (
+        /* MENU: Galeri Desain UI (Dribbble & Magnific) */
+        <UIGalleryView
+          onSelectStyle={handleSelectUIStyle}
+          onNavigateToStudio={() => setCurrentNavTab('studio')}
         />
       ) : currentNavTab === 'database' ? (
         /* MENU 4: Database Management & Skema Data */
