@@ -234,7 +234,7 @@ export default function Home() {
     setCurrentNavTab('studio');
   };
 
-  // Handler to select and apply a UI design style from Dribbble / Magnific gallery
+  // Handler to select and apply a UI design style from UI Gallery
   const handleSelectUIStyle = (styleItem: UIGalleryItem) => {
     if (currentApp) {
       const updatedVersions = currentApp.versions.map((v, i) => {
@@ -341,7 +341,7 @@ export default function Home() {
           onSelectUIStyle={handleSelectUIStyle}
         />
       ) : currentNavTab === 'gallery' ? (
-        /* MENU: Galeri Desain UI (Dribbble & Magnific) */
+        /* MENU: UI Gallery */
         <UIGalleryView
           onSelectStyle={handleSelectUIStyle}
           onNavigateToStudio={() => setCurrentNavTab('studio')}

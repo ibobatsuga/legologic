@@ -7,6 +7,7 @@ import {
   CreditWallet, AuditLog, TableDefinition, Organization, User 
 } from '@/types/legologic';
 import { InteractiveAppRenderer } from '@/components/InteractiveAppRenderer';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import { 
   Send, Sparkles, Monitor, Tablet, Smartphone, ExternalLink, 
   RotateCcw, History, Database, Rocket, ShieldAlert, CheckCircle2,
@@ -321,7 +322,7 @@ export function BuilderView({
                   </div>
                 )}
 
-                <p className="whitespace-pre-wrap">{msg.content}</p>
+                <MarkdownRenderer content={msg.content} isUser={msg.role === 'user'} />
 
                 {msg.creditsCost && (
                   <div className="mt-2 pt-1.5 border-t border-slate-200/60 flex items-center gap-2 text-[10px] text-slate-500 font-medium">

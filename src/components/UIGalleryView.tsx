@@ -72,14 +72,14 @@ export function UIGalleryView({
                 <Palette className="w-4 h-4" />
               </span>
               <h1 className="text-base font-bold text-slate-900 tracking-tight">
-                Galeri Desain UI (Dribbble & Magnific)
+                UI Gallery
               </h1>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-linear-to-r from-pink-500 to-rose-500 text-white shadow-2xs">
-                CURATED
+                PRO UI KITS
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-0.5">
-              Pilih estetika visual terbaik untuk aplikasi Anda sebelum masuk ke proses build.
+              Pilih estetika visual dan tata letak terbaik untuk aplikasi Anda sebelum masuk ke proses build.
             </p>
           </div>
 
@@ -103,7 +103,7 @@ export function UIGalleryView({
           <div className="space-y-2 max-w-xl z-10">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-md text-[11px] font-semibold text-pink-300 border border-white/10">
               <Sparkles className="w-3.5 h-3.5 text-pink-400" />
-              <span>Inspirasi Dribbble Pro & Visual Magnific AI</span>
+              <span>Koleksi Estetika UI & Layout Siap Pakai</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black tracking-tight leading-tight">
               Koleksi Estetika UI Modern Siap Terapkan
@@ -115,7 +115,7 @@ export function UIGalleryView({
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 z-10">
             <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-center min-w-28">
-              <div className="text-lg font-black text-amber-300">12+</div>
+              <div className="text-lg font-black text-amber-300">16+</div>
               <div className="text-[10px] text-slate-300 uppercase tracking-wider font-semibold">UI Styles</div>
             </div>
             <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl p-3 text-center min-w-28">
@@ -169,13 +169,7 @@ export function UIGalleryView({
 
                 {/* Badge Tag */}
                 <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                  <span className={`text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-sm text-white ${
-                    item.badge === 'Magnific AI' 
-                      ? 'bg-linear-to-r from-purple-600 to-pink-600'
-                      : item.badge === 'Dribbble Trending'
-                      ? 'bg-linear-to-r from-pink-600 to-rose-600'
-                      : 'bg-slate-900/90 backdrop-blur-md'
-                  }`}>
+                  <span className="text-[10px] font-black tracking-wider uppercase px-2.5 py-0.5 rounded-full shadow-sm text-white bg-slate-900/90 backdrop-blur-md">
                     {item.badge}
                   </span>
                 </div>

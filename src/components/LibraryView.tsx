@@ -51,7 +51,7 @@ export function LibraryView({
             <span>Library Proyek, Template & Galeri Desain UI</span>
           </h1>
           <p className="text-xs text-slate-500">
-            Kelola aplikasi Anda, pilih template operasional, atau tentukan gaya visual dari kurasi Dribbble & Magnific.
+            Kelola aplikasi Anda, pilih template operasional, atau tentukan gaya visual modern siap pakai.
           </p>
         </div>
 
@@ -124,11 +124,11 @@ export function LibraryView({
           }`}
         >
           <Palette className="w-3.5 h-3.5" />
-          <span>Galeri UI Dribbble & Magnific</span>
+          <span>UI Gallery</span>
           <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
             activeTab === 'gallery' ? 'bg-white/20 text-white' : 'bg-pink-200/80 text-pink-800'
           }`}>
-            12 Desain
+            16 Desain
           </span>
         </button>
       </div>

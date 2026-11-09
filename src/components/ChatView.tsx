@@ -10,6 +10,7 @@ import {
 import { LegoApp, CreditWallet, User, PRDDocument } from '@/types/legologic';
 import { analyzePromptCompleteness, generateFullPRD, convertPRDToLegoApp } from '@/lib/prd-engine';
 import { PRDViewerCard } from '@/components/PRDViewerCard';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 function FigmaIcon({ className = "w-3.5 h-3.5" }: { className?: string }) {
   return (
@@ -311,7 +312,7 @@ export function ChatView({
                   </div>
                 )}
 
-                <p className="whitespace-pre-wrap">{msg.text}</p>
+                <MarkdownRenderer content={msg.text} isUser={msg.sender === 'user'} />
                 <span className={`text-[10px] mt-2 block text-right ${msg.sender === 'user' ? 'text-slate-400' : 'text-slate-400'}`}>
                   {msg.timestamp}
                 </span>
@@ -341,7 +342,7 @@ export function ChatView({
                         className="text-[11px] text-left px-3 py-1.5 bg-pink-50 hover:bg-pink-100 hover:border-pink-300 text-pink-700 font-semibold rounded-xl border border-pink-200 shadow-2xs transition-colors flex items-center gap-1.5 active:scale-98"
                       >
                         <Palette className="w-3.5 h-3.5 text-pink-600 shrink-0" />
-                        <span>Pilih Gaya Desain dari Galeri UI (Dribbble/Magnific)</span>
+                        <span>Pilih Gaya Desain dari UI Gallery</span>
                       </button>
                     )}
                   </div>
