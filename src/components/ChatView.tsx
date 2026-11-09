@@ -64,10 +64,12 @@ export function ChatView({
       text: 'Halo Om Bobi! Saya asisten GENESIS AI. Untuk memastikan aplikasi yang kita bangun tepat guna dan tidak meleset dari kebutuhan bisnis Anda, kita akan melalui 3 alur kerja terstruktur:\n\n1. **Wawancara Pengguna** (menggali persona, tujuan, dan aturan bisnis)\n2. **Penyusunan PRD Resmi** (10 poin spesifikasi teknis lengkap)\n3. **Masuk ke Produksi** (generate aplikasi live di Studio)\n\nSilakan ceritakan ide aplikasi yang ingin Anda buat hari ini.',
       timestamp: '10:00',
       quickReplies: [
-        'Aplikasi Kasir & Order POS Kedai Kopi',
-        'Sistem Booking Jadwal & Rekam Medis Klinik Gigi',
-        'Pipeline CRM & Tracking Follow-up WhatsApp Sales',
-        'Kasir Laundry Kiloan & Notifikasi Siap Ambil'
+        'Aplikasi Rental Mobil & Motor',
+        'Manajemen Inventori & Stok Gudang Toko',
+        'Sistem Booking Lapangan Futsal / Olahraga',
+        'Tiket Servis Bengkel & Pengerjaan Teknis',
+        'Kasir POS & Pesanan Kedai Kopi',
+        'Pengelolaan Kamar Kost & Kontrakan'
       ]
     }
   ]);
@@ -110,15 +112,27 @@ export function ChatView({
     setPromptInput('');
     setIsGenerating(true);
 
-    const updatedNotes = [...accumulatedNotes, text];
-    setAccumulatedNotes(updatedNotes);
+    const isNewAppRequest = 
+      /buatkan|bikin|tolong buatkan|aplikasi baru|sistem baru|mau buat/i.test(text) || 
+      currentStage === 'production';
+
+    const updatedNotes = isNewAppRequest ? [text] : [...accumulatedNotes, text];
+    if (isNewAppRequest) {
+      setAccumulatedNotes([text]);
+      setCurrentStage('interview');
+    } else {
+      setAccumulatedNotes(updatedNotes);
+    }
 
     try {
       setGenerationStep('GENESIS AI menganalisis kelengkapan 10 kriteria PRD...');
       await new Promise(r => setTimeout(r, 800));
 
-      // Analyze completeness
-      const completeness = analyzePromptCompleteness(text, messages);
+      // Analyze completeness with session isolation to avoid history bleed
+      const activeHistory = isNewAppRequest 
+        ? [] 
+        : messages.filter(m => m.stage === 'interview' || m.stage === 'prd_review');
+      const completeness = analyzePromptCompleteness(text, activeHistory);
 
       if (!completeness.isComplete && currentStage !== 'prd_review') {
         // TAHAP 1: WAWANCARA PENGGUNA
@@ -442,7 +456,7 @@ export function ChatView({
               </button>
               <button 
                 type="button"
-                onClick={() => setPromptInput('Aplikasi Kasir POS Kedai Kopi. Persona: Kasir & Barista. In-Scope: order menu, bayar QRIS/Tunai, nota WhatsApp. Out-of-Scope: integrasi ojol. Aturan: stok cup otomatis.')}
+                onClick={() => setPromptInput('Aplikasi Rental Mobil & Armada. Persona: Admin & Petugas serah terima. In-Scope: daftar unit mobil, sewa per hari, tarif Rp, dan WA penyewa. Out-of-Scope: GPS tracker.')}
                 className="px-2 py-0.5 text-[10px] text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-md flex items-center gap-1 border border-slate-200"
               >
                 <Wand2 className="w-3 h-3 text-amber-500" />
@@ -474,10 +488,12 @@ export function ChatView({
         {/* Quick Suggestion Pills */}
         <div className="flex flex-wrap items-center justify-center gap-1.5 mt-2.5">
           {[
-            { label: '☕ Kasir Kedai Kopi', prompt: 'Saya mau buat aplikasi kasir kedai kopi dengan pencatatan order, bayar QRIS & Tunai, dan nota WhatsApp.' },
-            { label: '🏥 Booking Klinik Gigi', prompt: 'Buatkan sistem pendaftaran antrean pasien klinik gigi, jadwal dokter, dan rekam medis tindakan.' },
-            { label: '💬 CRM Pipeline Sales', prompt: 'Buatkan aplikasi CRM WhatsApp dengan tracking leads dan kanban pipeline deals.' },
-            { label: '🧺 Kasir Laundry', prompt: 'Buatkan aplikasi kasir laundry kiloan dengan nomor rak nota dan status WhatsApp siap ambil.' },
+            { label: '🚗 Rental Mobil', prompt: 'Saya mau buat aplikasi persewaan rental mobil dengan pencatatan unit armada, durasi sewa per hari, dan nomor WhatsApp penyewa.' },
+            { label: '📦 Stok & Inventori', prompt: 'Buatkan aplikasi manajemen inventori stok barang toko dengan harga beli vs harga jual dan peringatan stok menipis.' },
+            { label: '⚽ Booking Lapangan', prompt: 'Buatkan sistem jadwal booking sewa lapangan futsal per jam dengan pelacak status DP dan WhatsApp.' },
+            { label: '🔧 Bengkel & Servis', prompt: 'Buatkan sistem tiket servis bengkel motor dengan nomor polisi, catatan keluhan, estimasi biaya, dan notifikasi WA.' },
+            { label: '☕ Kasir Kedai Kopi', prompt: 'Buatkan aplikasi kasir kedai kopi dengan pencatatan pesanan, pembayaran QRIS/Tunai, dan cetak nota digital.' },
+            { label: '🏠 Kamar Kost', prompt: 'Buatkan aplikasi pengelolaan kamar kost dengan nomor kamar, harga sewa bulanan, dan pengingat jatuh tempo WA.' },
           ].map(item => (
             <button
               key={item.label}
